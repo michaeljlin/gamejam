@@ -67,8 +67,8 @@ const gameLoop = (function(global){
      * @returns {Symbol} id of callback
      */
     main.addListener = function(callback){
-        const id = new Symbol();
-        listeners.map.add(id, callback);
+        const id = Symbol();
+        listeners.map.set(id, callback);
         listeners.queue.push(id);
         return id;
     };
