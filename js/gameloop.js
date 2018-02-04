@@ -1,14 +1,28 @@
 "use strict";
 
-const gameLoop = (function(){
+const gameLoop = (function(global){
     /**
      * Main game event loop function
      */
-    const main = function(){
+    const main = function(tickEnd){
+        const tickStep = tickEnd - tickStart;
 
+        if (tickStep > 0){
+            listeners.queue.forEach(listenerId => {
+                listeners.map.get(listenerId)({
+                    start: tickStart,
+                    end: tickEnd,
+                    step: tickStep
+                });
+            });
+        }
+
+        tickStart = tickEnd;
+        timeout = global.requestAnimationFrame(main);
     };
 
-    let timeoutId = null;
+    let timeout = null;
+    let tickStart = null;
     const listeners = {
         queue: [],
         map: new Map()
@@ -18,7 +32,10 @@ const gameLoop = (function(){
      * Starts game loop
      */
     main.start = function(){
-
+        if (timeout === null){
+            tickStart = performance.now();
+            timeout = global.requestAnimationFrame(main);
+        }
     };
 
     /**
@@ -37,7 +54,11 @@ const gameLoop = (function(){
 
     /**
      * Add a listener
-     * @param {function} callback
+     * @callback {function} callback
+     *  @param {Object} timing
+     *      @property {int} start - tick start timestamp
+     *      @property {int} end - tick end timestamp
+     *      @property {int} step - tick size in ms
      * @returns {Symbol} id of callback
      */
     main.addListener = function(callback){
@@ -53,9 +74,14 @@ const gameLoop = (function(){
      * @returns {boolean} true if callback was removed, false otherwise
      */
     main.removeListener = function(id){
-        return true;
+        if (listeners.map.has(id)){
+            listeners.queue = listeners.queue.filter(elem => elem !== id);
+            listeners.map.delete(id);
+            return true;
+        }
+        return false;
     };
 
     return main;
-})();
+})(window);
 
