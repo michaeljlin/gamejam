@@ -47,14 +47,24 @@ const gameLoop = (function(global){
      * Pauses game loop
      */
     main.pause = function(){
-
+        if (timeout !== null){
+            global.cancelAnimationFrame(timeout);
+            tickStart = null;
+            timeout = null;
+            return true;
+        }
+        return false;
     };
 
     /**
      * Stops game loop, removing all listeners
      */
     main.stop = function(){
-
+        const pause = main.pause();
+        while(listeners.queue.length > 0){
+            main.removeListener(listeners.queue[0]);
+        }
+        return pause;
     };
 
     /**
