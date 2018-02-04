@@ -53,7 +53,12 @@ const gameLoop = (function(){
      * @returns {boolean} true if callback was removed, false otherwise
      */
     main.removeListener = function(id){
-        return true;
+        if (listeners.map.has(id)){
+            listeners.queue = listeners.queue.filter(elem => elem !== id);
+            listeners.map.delete(id);
+            return true;
+        }
+        return false;
     };
 
     return main;
