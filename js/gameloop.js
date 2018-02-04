@@ -9,7 +9,10 @@ const gameLoop = (function(){
     };
 
     let timeoutId = null;
-    const listeners = [];
+    const listeners = {
+        queue: [],
+        map: new Map()
+    };
 
     /**
      * Starts game loop
@@ -35,17 +38,23 @@ const gameLoop = (function(){
     /**
      * Add a listener
      * @param {function} callback
+     * @returns {Symbol} id of callback
      */
     main.addListener = function(callback){
 
+
+        const id = new Symbol();
+
+        return id;
     };
 
     /**
      * Removes a listener
-     * @param {function} callback
+     * @param {function} id - id of callback
+     * @returns {boolean} true if callback was removed, false otherwise
      */
-    main.removeListener = function(callback){
-
+    main.removeListener = function(id){
+        return true;
     };
 
     return main;
