@@ -22,17 +22,16 @@
                 square.css('transform', `rotate(${rotation}deg)`);
 
                 gameLoop.addListener(spinSquare);
-                
+
                 $('#start').click(gameLoop.start);
             })
             var square = null;
             var rotation = 0;
 
             function spinSquare(times){
-                rotation += times.step * 1;
+                rotation += times.step * 45/1000;
                 console.log('rotation to ', rotation);
-                rotation = `rotate(${rotation}deg)`;
-                square.css('transform', rotation);
+                square.css('transform', `rotate(${rotation}deg)`);
             }
 
         </script>
