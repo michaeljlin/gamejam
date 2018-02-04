@@ -4,11 +4,13 @@ var keys = [];
 
 var canvas = null;
 var ctx = null;
-var charPosition = [640,360];
+
+var groundImg = new Image();
+var playerImg = new Image();
 
 var char = {
     x: 640,
-    y: 360
+    y: 500
 };
 
 var faster = 0;
@@ -28,6 +30,13 @@ function initialize() {
         'height':"720px"
     });
 
+    playerImg.src = './assets/images/Cat eat.png';
+    groundImg.src = './assets/images/ground.png';
+
+    // playerImg.onload = function(){
+    //     ctx.drawImage(img, playerX, playerY, 50, 50);
+    // };
+
     ctx.fillStyle = 'white';
 
     ctx.fillRect(0,0,1280,720);
@@ -44,6 +53,8 @@ function game(){
     ctx.fillStyle = 'white';
     ctx.fillRect(0,0,1280,720);
 
+    ctx.drawImage(groundImg, 0, 0, 1080, 1920, 0, 0, 1280, 1280);
+
     if(keys[16]){
         faster = 2;
         friction = 0.85;
@@ -53,13 +64,13 @@ function game(){
         friction = 0.7;
     }
 
-    if(keys[38]){
-        velY -=baseSpeed+faster;
-    }
-
-    if(keys[40]){
-        velY +=baseSpeed+faster;
-    }
+    // if(keys[38]){
+    //     velY -=baseSpeed+faster;
+    // }
+    //
+    // if(keys[40]){
+    //     velY +=baseSpeed+faster;
+    // }
 
     if(keys[39]){
         velX +=baseSpeed+faster;
@@ -69,8 +80,8 @@ function game(){
         velX -=baseSpeed+faster;
     }
 
-    if(char.x >= 1230){
-        char.x = 1230;
+    if(char.x >= 1150){
+        char.x = 1150;
     }
     else if(char.x <= 0){
         char.x = 0;
@@ -89,41 +100,16 @@ function game(){
     velX *= friction;
     char.x += velX;
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(char.x,char.y,50,50);
+    // ctx.fillStyle = 'black';
+    // ctx.fillRect(char.x,char.y,50,50);
+
+    ctx.drawImage(playerImg, char.x, char.y, 155.55, 191.25);
 
     requestAnimationFrame(game);
 };
 
 $(document).on("keydown", function (e) {
     keys[e.keyCode] = true;
-
-    // switch(e.keyCode){
-    //     case 27:
-    //         console.log('escape pressed');
-    //         break;
-    //     case 13:
-    //         console.log('enter pressed');
-    //         break;
-    //     case 38:
-    //         charPosition[1]-=10;
-    //         console.log('up pressed');
-    //         break;
-    //     case 40:
-    //         charPosition[1]+=10;
-    //         console.log('down pressed');
-    //         break;
-    //     case 37:
-    //         charPosition[0]-=10;
-    //         console.log('left pressed');
-    //         break;
-    //     case 39:
-    //         charPosition[0]+=10;
-    //         console.log('right pressed');
-    //         break;
-    //     default:
-    //         break;
-    // }
 
     console.log('key pressed: ', e.keyCode);
 });
