@@ -5,6 +5,9 @@ const gameLoop = (function(global){
      * Main game event loop function
      */
     const main = function(tickEnd){
+        if (timeout === null){
+            return main.start();
+        }
         const tickStep = tickEnd - tickStart;
 
         if (tickStep > 0){
@@ -35,7 +38,9 @@ const gameLoop = (function(global){
         if (timeout === null){
             tickStart = performance.now();
             timeout = global.requestAnimationFrame(main);
+            return true;
         }
+        return false;
     };
 
     /**
@@ -54,7 +59,7 @@ const gameLoop = (function(global){
 
     /**
      * Add a listener
-     * @callback {function} callback
+     * @callback {function} callback to execute on each game tick
      *  @param {Object} timing
      *      @property {int} start - tick start timestamp
      *      @property {int} end - tick end timestamp
