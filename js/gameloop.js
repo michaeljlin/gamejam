@@ -37,7 +37,11 @@ const gameLoop = (function(){
 
     /**
      * Add a listener
-     * @param {function} callback
+     * @callback {function} callback
+     *  @param {Object} timing
+     *      @property {int} start - tick start timestamp
+     *      @property {int} end - tick end timestamp
+     *      @property {int} step - tick size in ms
      * @returns {Symbol} id of callback
      */
     main.addListener = function(callback){
