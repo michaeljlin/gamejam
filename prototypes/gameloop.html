@@ -10,6 +10,8 @@
             #spinny {
                 height: 200px;
                 width: 200px;
+                position: relative;
+                top: 100px;
                 border: 1px solid black;
                 background-color: brown;
             }
@@ -21,9 +23,15 @@
                 square = $('#spinny');
                 square.css('transform', `rotate(${rotation}deg)`);
 
-                gameLoop.addListener(spinSquare);
-
-                $('#start').click(gameLoop.start);
+                $('#start').click(event => {
+                    gameLoop.addListener(spinSquare);
+                    gameLoop.start();
+                });
+                $('#pause').click(gameLoop.pause);
+                $('#stop').click(event => {
+                    rotation = 0;
+                    gameLoop.stop();
+                });
             })
             var square = null;
             var rotation = 0;
@@ -39,6 +47,8 @@
     <body>
         <div class="container">
             <button id="start">Start loop</button>
+            <button id="pause">Pause loop</button>
+            <button id="stop">Stop loop</button>
             <div id="spinny"></div>
         </div>
     </body>
