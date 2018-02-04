@@ -7,9 +7,10 @@ var ctx = null;
 
 var groundImg = new Image();
 var playerImg = new Image();
+var skyImg = new Image();
 
 var char = {
-    x: 640,
+    x: 570,
     y: 500
 };
 
@@ -32,6 +33,7 @@ function initialize() {
 
     playerImg.src = './assets/images/Cat eat.png';
     groundImg.src = './assets/images/ground.png';
+    skyImg.src = './assets/images/cloud sky.png';
 
     // playerImg.onload = function(){
     //     ctx.drawImage(img, playerX, playerY, 50, 50);
@@ -53,7 +55,8 @@ function game(){
     ctx.fillStyle = 'white';
     ctx.fillRect(0,0,1280,720);
 
-    ctx.drawImage(groundImg, 0, 0, 1080, 1920, 0, 0, 1280, 1280);
+    ctx.drawImage(skyImg, 0,0, 1920, 1080, 0,0, 1280, 720);
+    ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
 
     if(keys[16]){
         faster = 2;
