@@ -1,14 +1,28 @@
 "use strict";
 
-const gameLoop = (function(){
+const gameLoop = (function(global){
     /**
      * Main game event loop function
      */
-    const main = function(){
+    const main = function(tickEnd){
+        const tickStep = tickEnd - tickStart;
 
+        if (tickStep > 0){
+            listeners.queue.forEach(listenerId => {
+                listeners.map.get(listenerId)({
+                    start: tickStart,
+                    end: tickEnd,
+                    step: tickStep
+                });
+            });
+        }
+
+        tickStart = tickEnd;
+        timeout = global.requestAnimationFrame(main);
     };
 
-    let timeoutId = null;
+    let timeout = null;
+    let tickStart = null;
     const listeners = {
         queue: [],
         map: new Map()
@@ -18,7 +32,10 @@ const gameLoop = (function(){
      * Starts game loop
      */
     main.start = function(){
-
+        if (timeout === null){
+            tickStart = performance.now();
+            timeout = global.requestAnimationFrame(main);
+        }
     };
 
     /**
@@ -66,5 +83,5 @@ const gameLoop = (function(){
     };
 
     return main;
-})();
+})(window);
 
