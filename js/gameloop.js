@@ -9,24 +9,42 @@ const gameLoop = (function(){
     };
 
     let timeoutId = null;
+    const listeners = [];
 
+    /**
+     * Starts game loop
+     */
     main.start = function(){
 
     };
 
-    main.stop = function(){
-
-    };
-
+    /**
+     * Pauses game loop
+     */
     main.pause = function(){
 
     };
 
-    main.addListener = function(){
+    /**
+     * Stops game loop, removing all listeners
+     */
+    main.stop = function(){
 
     };
 
-    main.removeListener = function(){
+    /**
+     * Add a listener
+     * @param {function} callback
+     */
+    main.addListener = function(callback){
+
+    };
+
+    /**
+     * Removes a listener
+     * @param {function} callback
+     */
+    main.removeListener = function(callback){
 
     };
 
