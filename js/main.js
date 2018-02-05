@@ -9,9 +9,12 @@ var canvas = null;
 var ctx = null;
 
 var backgroundMusic = new Audio('./assets/sound/Arcade-Puzzler.mp3');
-var damageSound = new Audio('./assets/sound/damage.wav');
-var eatSound = new Audio('./assets/sound/eat.wav');
+var damageSound = new Audio('./assets/sound/explosion.mp3');
+var eatMouse = new Audio('./assets/sound/eatMouse.mp3');
+var eatFish = new Audio('./assets/sound/eatFish.mp3');
 var gameoverSound = new Audio('./assets/sound/gameover.wav');
+var walkSound1 = new Audio('./assets/sound/SFX_Walk1.mp3');
+var walkSound2 = new Audio('./assets/sound/SFX_Walk3.mp3');
 
 var groundImg = new Image();
 var playerImg = new Image();
@@ -132,6 +135,9 @@ function initialize() {
 
     ctx.translate(0,0);
 
+    walkSound1.loop = true;
+    walkSound2.loop = true;
+
     backgroundMusic.volume = 0.5;
     backgroundMusic.loop = true;
     backgroundMusic.play();
@@ -143,6 +149,8 @@ function initialize() {
 }
 
 function handleDamage(){
+    damageSound.play();
+
     for(let counter = heartBar.length; counter >=0; counter--){
         if( $(heartBar[counter]).attr('src') === './assets/images/heartfull.png'){
             heartBar[counter] = heartEmpty;
@@ -162,11 +170,20 @@ function handleDeath(){
     deathState = true;
 }
 
-function handleHeal(){
+// function handleEating(){
+//     eatSound.play();
+// };
 
-};
+function handleEatMouse(){
+    eatMouse.play();
+}
+
+function handleEatFish(){
+    eatFish.play();
+}
 
 function handleExplode(){
+    damageSound.play();
     explodeFade = 1;
     explodeState = true;
 }
@@ -182,6 +199,10 @@ function game(gameObjects){
 
     ctx.drawImage(skyImg, 0,0, 1920, 1080, 0,0, 1280, 720);
     ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
+
+    ctx.fillStyle = 'black';
+    ctx.font = '24px serif';
+    ctx.fillText('Score: '+gameObjects.player.score, 1100, 65);
 
     // heartBar.map(function(heart, index){
     //     ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
@@ -238,6 +259,22 @@ function game(gameObjects){
                 break;
         }
 
+        if(npc.type === 'fish' && npc.state === 'eaten'){
+            handleEatFish();
+        }
+
+        if(npc.type === 'rat' && npc.state === 'eaten'){
+            handleEatMouse();
+        }
+
+        // if(npc.type === 'bomb' && npc.state === 'eaten'){
+        //     handleExplode();
+        // }
+        //
+        // if(npc.type === 'spider' && npc.state === 'eaten'){
+        //     damageSound.play();
+        // }
+
         ctx.drawImage(objImage, 0, 0, objX, objY, npc.x, npc.y, drawX, drawY);
         //ctx.fillRect(npc.x,npc.y, 50, 100);
     })
@@ -249,6 +286,14 @@ function game(gameObjects){
     if(gameObjects.player.state === 'dead'){
         handleDeath();
     }
+
+    if(gameObjects.player.state === 'moving'){
+
+    }
+
+    // if(gameObjects.player.state === 'eating'){
+    //     handleEating();
+    // }
 
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
@@ -345,8 +390,17 @@ $(document).on("keydown", function (e) {
 
     if(keys[37]){
         tracker.setPlayerDirection(-1);
+
+        if(walkSound1.paused){
+            walkSound1.play();
+        }
     }
     else if(keys[39]){
+
+        if(walkSound1.paused){
+            walkSound1.play();
+        }
+
         tracker.setPlayerDirection(1);
     }
 
@@ -357,6 +411,8 @@ $(document).on("keyup", function (e) {
     keys[e.keyCode] = false;
 
     if(!keys[37] && !keys[39]){
+
+        walkSound1.pause();
         tracker.setPlayerDirection(0);
     }
 });
