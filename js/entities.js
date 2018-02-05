@@ -115,6 +115,8 @@ const createEntityTracker = (function(global){
                             if (player.currentHealth <= 0){
                                 newPlayerState = 'dead';
                             }
+                        } else {
+                            player.setScore(player.getScore() + 1);
                         }
                         player.setState(newPlayerState);
                         console.log(`Collision with ${npc.getType()}! Current health: ${player.currentHealth} New player state: ${newPlayerState}`);
@@ -197,6 +199,7 @@ const createEntityTracker = (function(global){
 
             positions.player.state = this._entities.player.getState();
             positions.player.health = this._entities.player.getHealth();
+            positions.player.score = this._entities.player.getScore();
 
             return positions;
         }
@@ -299,6 +302,7 @@ const createEntityTracker = (function(global){
             this.accelerationRate = 0.03;
             this.frictionRate = 0.03;
 
+            this.score = 0;
             this.maxHealth = 9;
             this.currentHealth = this.maxHealth;
         }
@@ -308,6 +312,15 @@ const createEntityTracker = (function(global){
                 current: this.currentHealth,
                 maximum: this.maxHealth
             };
+        }
+
+        getScore(){
+            return this.score;
+        }
+
+        setScore(points){
+            this.score = points;
+            return this;
         }
 
         setDirection(direction){
