@@ -87,10 +87,14 @@ const createEntityTracker = (function(global){
 
     class Entity {
         constructor(position, velocity){
-            this._position.x = position.x;
-            this._position.y = position.y;
-            this._velocity.x = velocity.x;
-            this._velocity.y = velocity.y;
+            this._position = {
+                x: position.x,
+                y: position.y
+            };
+            this._velocity = {
+                x: velocity.x,
+                y: velocity.y
+            };
         }
 
         getPosition(){
@@ -129,7 +133,7 @@ const createEntityTracker = (function(global){
             this.accelerationRate = 0.001;
         }
 
-        setDirection(){
+        setDirection(direction){
             if ([-1, 0, 1].includes(direction)){
                 this.direction = direction;
                 return direction;
