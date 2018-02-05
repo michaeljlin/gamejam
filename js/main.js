@@ -196,6 +196,10 @@ function game(gameObjects){
     ctx.drawImage(skyImg, 0,0, 1920, 1080, 0,0, 1280, 720);
     ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
 
+    ctx.fillStyle = 'black';
+    ctx.font = '24px serif';
+    ctx.fillText('Score: ', 1100, 65);
+
     // heartBar.map(function(heart, index){
     //     ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
     // });
