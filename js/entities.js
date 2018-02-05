@@ -53,6 +53,7 @@ const createEntityTracker = (function(global){
 
         advancePlayer(timing){
             const player = this._entities.player;
+            player.setState('normal');
             const startVelocityX = player.getVelocity().x;
             const startPosition = player.getPosition();
             if (player.direction){
@@ -84,7 +85,20 @@ const createEntityTracker = (function(global){
         }
 
         checkCollisions(){
-
+            const player = this._entities.player;
+            this._entities.npcs.forEach(npc => {
+                const horizontalOverlap = 
+                    (npc._position.left > player._position.right)
+                    && (player._position.left > npc._position.right);
+                const verticalOverlap = 
+                    (npc._position.top > player._position.bottom)
+                    && (player._position.top > npc._position.bottom);
+                if (horizontalOverlap && verticalOverlap){
+                    npc.setState('eaten');
+                    player.setState('eating');
+                    console.log(`Collision with ${npc.getType()}!`);
+                }
+            });
         }
 
         collectGarbage(){
@@ -211,6 +225,11 @@ const createEntityTracker = (function(global){
 
         getState(){
             return this._state;
+        }
+
+        setState(newState){
+            this._state = newState;
+            return this;
         }
 
         getPosition(){
