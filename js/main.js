@@ -183,9 +183,13 @@ function game(gameObjects){
     ctx.drawImage(skyImg, 0,0, 1920, 1080, 0,0, 1280, 720);
     ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
 
-    heartBar.map(function(heart, index){
-        ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
-    });
+    // heartBar.map(function(heart, index){
+    //     ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
+    // });
+
+    for(let count = 1; count <=gameObjects.player.health.current; count++){
+        ctx.drawImage(heartFull, 0,0,240,180, 50+50*count, 50, 40, 30);
+    }
 
 
     // ctx.drawImage(obj_spider, 0,0, 1056, 1788, 0,0, 52.8, 89.4); // 0.07 multiplier
@@ -237,6 +241,14 @@ function game(gameObjects){
         ctx.drawImage(objImage, 0, 0, objX, objY, npc.x, npc.y, drawX, drawY);
         //ctx.fillRect(npc.x,npc.y, 50, 100);
     })
+
+    if(gameObjects.player.state === 'harmed'){
+        handleExplode();
+    }
+
+    if(gameObjects.player.state === 'dead'){
+        handleDeath();
+    }
 
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
