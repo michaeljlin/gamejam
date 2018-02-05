@@ -33,9 +33,9 @@ const createEntityTracker = (function(global){
         advanceTick(timing){
             this.advancePlayer(timing);
             if (this._entities.npcs.length > 0){
+                this.collectGarbage();
                 this.advanceNpcs(timing);
                 this.checkCollisions();
-                this.collectGarbage();
             }
             this.checkNewSpawns(timing);
 
@@ -81,6 +81,9 @@ const createEntityTracker = (function(global){
                 const startVelocity = npc.getVelocity();
                 const endPositionY = startPosition.y + startVelocity.y;
                 npc.setPosition(startPosition.x, endPositionY);
+                if (endPositionY > this._worldSize.y){
+                    npc.setState("offscreen");
+                }
             });
         }
 
@@ -102,7 +105,12 @@ const createEntityTracker = (function(global){
         }
 
         collectGarbage(){
-
+            const npcs = this._entities.npcs;
+            for (let i = npcs.length - 1; i >= 0; i--){
+                if (npcs[i].getState() === "offscreen"){
+                    npcs.splice(i, 1);
+                }
+            }
         }
 
         checkNewSpawns(timing){
