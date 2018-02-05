@@ -39,6 +39,11 @@ var friction = 0.7;
 var animationCounter = 0;
 
 const tracker = createEntityTracker({x: 1280, y: 720}, {width: 155.55, height: 191.25}, char, game);
+tracker.defineNpcType('rat', {width: 35, height: 100});
+tracker.defineNpcType('fish', {width: 35, height: 100});
+tracker.defineNpcType('bomb', {width: 35, height: 100});
+tracker.defineNpcType('spider', {width: 35, height: 100});
+tracker.defineNpcType('wind-up fish', {width: 35, height: 100});
 gameLoop.addListener(tracker.advanceTick);
 
 // function trackerCallback(){

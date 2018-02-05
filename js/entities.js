@@ -46,7 +46,7 @@ const createEntityTracker = (function(global){
         }
 
         defineNpcType(name, size, spawnWeight = timestamp => 1){
-            map.set(name, {size, spawnWeight});
+            this._npcTypes.set(name, {size, spawnWeight});
             return this;
         }
 
@@ -107,31 +107,45 @@ const createEntityTracker = (function(global){
 
         determineSpawnType(timing){
             const types = this._npcTypes.keys();
-            const weights = types.map(type => (
-                this._npcTypes.get(type).spawnWeight(timing.gameTime)
-            ));
+            const weights = [];
+            this._npcTypes.forEach(type => {
+                weights.push(type.spawnWeight(timing.gameTime));
+            })
+            // for (let i = 0; i < types.length; i++){
+            //     weights.push(this._npcTypes.get(type).spawnWeight(timing.gameTime));
+            // }
             const totalWeight = weights.reduce((acc, curr) => (acc + curr), 0);
             const percentages = weights.map(weight => weight / totalWeight);
             let remainingChance = Math.random();
             for (let i = 0; i < percentages.length; i++){
                 remainingChance -= percentages[i];
+                const value = types.next().value;
                 if (remainingChance < 0){
-                    return types[i];
+                    return value;
                 }
             }
         }
 
         spawnNpc(type){
-            const npc = new NonPlayerEntity(type);
+            const npc = new NonPlayerEntity(
+                type,
+                this._npcTypes.get(type).size,
+                {x: 0, y: 0},
+                {x: 0, y: 0}
+            );
         }
 
         getPositions(){
             const positions = {
                 player: this._entities.player.getPosition(),
-                npcs: []
+                npcs: this._entities.npcs.map(npc => {
+                    const position = npc.getPosition();
+                    position.type = npc.getType();
+                    position.state = npc.getState();
+                })
             };
 
-            positions.player.state = "normal";
+            positions.player.state = this._entities.player.getState();
 
             return positions;
         }
@@ -139,6 +153,7 @@ const createEntityTracker = (function(global){
 
     class Entity {
         constructor(size, position, velocity){
+            this._state = "normal";
             this._size = {
                 width: size.width,
                 height: size.height
@@ -185,6 +200,10 @@ const createEntityTracker = (function(global){
                     }
                 },
             });
+        }
+
+        getState(){
+            return this._state;
         }
 
         getPosition(){
@@ -240,8 +259,8 @@ const createEntityTracker = (function(global){
     }
 
     class NonPlayerEntity extends Entity {
-        constructor(type, startPosition, startVelocity){
-            super(this._npcTypes.get(type).size, startPosition, startVelocity);
+        constructor(type, size, startPosition, startVelocity){
+            super(size, startPosition, startVelocity);
 
             this._type = type;
         }
