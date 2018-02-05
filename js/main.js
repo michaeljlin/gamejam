@@ -8,6 +8,11 @@ keys[39] = false;
 var canvas = null;
 var ctx = null;
 
+var backgroundMusic = new Audio('./assets/sound/Arcade-Puzzler.mp3');
+var damageSound = new Audio('./assets/sound/damage.wav');
+var eatSound = new Audio('./assets/sound/eat.wav');
+var gameoverSound = new Audio('./assets/sound/gameover.wav');
+
 var groundImg = new Image();
 var playerImg = new Image();
 var skyImg = new Image();
@@ -39,6 +44,8 @@ var heartFull = new Image();
 var heartEmpty = new Image();
 
 var heartBar = [];
+
+var score = 0;
 
 var char = {
     x: 570,
@@ -125,6 +132,11 @@ function initialize() {
 
     ctx.translate(0,0);
 
+    backgroundMusic.loop = true;
+    backgroundMusic.play();
+
+    gameoverSound.loop = true;
+
     gameLoop.start();
 }
 
@@ -142,9 +154,15 @@ function handleDamage(){
 }
 
 function handleDeath(){
+    backgroundMusic.pause();
+    gameoverSound.play();
     playerImg = death;
     deathState = true;
 }
+
+function handleHeal(){
+
+};
 
 function handleExplode(){
     explodeFade = 1;
