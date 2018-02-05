@@ -17,8 +17,8 @@ const createEntityTracker = (function(global){
                 player: new PlayerEntity(playerSize, playerStartPos),
                 npcs: []
             }
-            this._spawnPeriod = 2000;
-            this._spawnCountdown = this._spawnPeriod;
+            this._npcTypes = new Map();
+            this._spawnPeriod = timestamp => 2000;
 
             this.advanceTick = this.advanceTick.bind(this);
             this.advancePlayer = this.advancePlayer.bind(this);
@@ -39,7 +39,12 @@ const createEntityTracker = (function(global){
         }
 
         setPlayerDirection(direction){
-            this._entities.player.setDirection(direction);
+            return this._entities.player.setDirection(direction);
+        }
+
+        defineNpcType(name, size, spawnWeight = timestamp => 1){
+            map.set(name, {size, spawnWeight});
+            return this;
         }
 
         advancePlayer(timing){
@@ -78,6 +83,33 @@ const createEntityTracker = (function(global){
         }
 
         checkNewSpawns(timing){
+            if (this.readyForSpawn(timing)){
+                const spawnType = this.determineSpawnType(timing);
+                this.spawnNpc(spawnType);
+            }
+        }
+
+        readyForSpawn(timing){
+
+        }
+
+        determineSpawnType(timing){
+            const types = this._npcTypes.keys();
+            const weights = types.map(type => (
+                this._npcTypes.get(type).spawnWeight(timing.end)
+            ));
+            const totalWeight = weights.reduce((acc, curr) => (acc + curr), 0);
+            const percentages = weights.map(weight => weight / totalWeight);
+            let remainingChance = Math.random();
+            for (let i = 0; i < percentages.length; i++){
+                remainingChance -= percentages[i];
+                if (remainingChance < 0){
+                    return types[i];
+                }
+            }
+        }
+
+        spawnNpc(type){
 
         }
 
