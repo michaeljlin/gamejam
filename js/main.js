@@ -19,6 +19,11 @@ var left2 = new Image();
 var right1 = new Image();
 var right2 = new Image();
 
+var heartFull = new Image();
+var heartEmpty = new Image();
+
+var heartBar = [];
+
 var char = {
     x: 570,
     y: 500
@@ -66,6 +71,21 @@ function initialize() {
     right1.src = './assets/images/right1.png';
     right2.src = './assets/images/right2.png';
 
+    heartFull.src = './assets/images/heartfull.bmp';
+    heartEmpty.src = './assets/images/heartempty.bmp';
+
+    heartBar = [
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull
+    ];
+
     groundImg.src = './assets/images/ground.png';
     skyImg.src = './assets/images/cloud sky.png';
 
@@ -95,6 +115,10 @@ function game(gameObjects){
 
     ctx.drawImage(skyImg, 0,0, 1920, 1080, 0,0, 1280, 720);
     ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
+
+    heartBar.map(function(heart, index){
+        ctx.drawImage(heart, 0,0,160,120, 50*index, 50, 40, 30);
+    });
 
     if(keys[16]){
         faster = 2;
@@ -171,7 +195,7 @@ function game(gameObjects){
             playerImg = left1;
         }
 
-        if(animationCounter >= 15){
+        if(animationCounter >= 10){
             if($(playerImg).attr('src') === './assets/images/left1.png'){
                 playerImg = left2;
                 animationCounter = 0;
@@ -188,7 +212,7 @@ function game(gameObjects){
             playerImg = right1;
         }
 
-        if(animationCounter >= 15){
+        if(animationCounter >= 10){
             if($(playerImg).attr('src') === './assets/images/right1.png'){
                 playerImg = right2;
                 animationCounter = 0;
