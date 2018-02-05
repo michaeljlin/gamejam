@@ -87,10 +87,14 @@ const createEntityTracker = (function(global){
 
     class Entity {
         constructor(position, velocity){
-            this._position.x = position.x;
-            this._position.y = position.y;
-            this._velocity.x = velocity.x;
-            this._velocity.y = velocity.y;
+            this._position = {
+                x: position.x,
+                y: position.y
+            };
+            this._velocity = {
+                x: velocity.x,
+                y: velocity.y
+            };
         }
 
         getPosition(){
