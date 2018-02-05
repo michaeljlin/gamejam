@@ -31,15 +31,17 @@ const createEntityTracker = (function(global){
         }
 
         advanceTick(timing){
-            this.advancePlayer(timing);
-            if (this._entities.npcs.length > 0){
-                this.collectGarbage();
-                this.advanceNpcs(timing);
-                this.checkCollisions();
+            if (this._entities.player.getState() !== "dead"){
+                this.advancePlayer(timing);
+                if (this._entities.npcs.length > 0){
+                    this.collectGarbage();
+                    this.advanceNpcs(timing);
+                    this.checkCollisions();
+                }
+                this.checkNewSpawns(timing);
             }
-            this.checkNewSpawns(timing);
 
-            this._tickCallback(this.getPositions());
+            this._tickCallback(this.getState());
         }
 
         setPlayerDirection(direction){
@@ -105,11 +107,17 @@ const createEntityTracker = (function(global){
                 if (horizontalOverlap && verticalOverlap){
                     npc.setState('eaten');
                     if (player.getState() !== 'harmed'){
-                        const newPlayerState = (this._npcTypes.get(npc.getType()).harmful)
+                        let newPlayerState = (this._npcTypes.get(npc.getType()).harmful)
                             ? 'harmed'
                             : 'eating';
-                        player.setState('eating');
-                        console.log(`Collision with ${npc.getType()}! New player state: ${newPlayerState}`);
+                        if (newPlayerState === 'harmed'){
+                            player.currentHealth--;
+                            if (player.currentHealth <= 0){
+                                newPlayerState = 'dead';
+                            }
+                        }
+                        player.setState(newPlayerState);
+                        console.log(`Collision with ${npc.getType()}! Current health: ${player.currentHealth} New player state: ${newPlayerState}`);
                     }
                 }
             });
@@ -176,7 +184,7 @@ const createEntityTracker = (function(global){
             this._entities.npcs.push(npc);
         }
 
-        getPositions(){
+        getState(){
             const positions = {
                 player: this._entities.player.getPosition(),
                 npcs: this._entities.npcs.map(npc => {
@@ -188,6 +196,7 @@ const createEntityTracker = (function(global){
             };
 
             positions.player.state = this._entities.player.getState();
+            positions.player.health = this._entities.player.getHealth();
 
             return positions;
         }
@@ -289,6 +298,16 @@ const createEntityTracker = (function(global){
             this.maxSpeed = 0.4;
             this.accelerationRate = 0.03;
             this.frictionRate = 0.03;
+
+            this.maxHealth = 9;
+            this.currentHealth = this.maxHealth;
+        }
+
+        getHealth(){
+            return {
+                current: this.currentHealth,
+                maximum: this.maxHealth
+            };
         }
 
         setDirection(direction){

@@ -2,7 +2,11 @@
     "player": {
         "x": 34,
         "y": 712,
-        "state": "normal | moving | eating | harmed"
+        "state": "normal | moving | eating | harmed | dead",
+        "health": {
+            "current": 4,
+            "maximum": 9
+        }
     },
     "npcs": [
         {
