@@ -64,7 +64,7 @@ tracker.defineNpcType('rat', {width: 47.04, height: 93.6});
 tracker.defineNpcType('fish', {width: 47.04, height: 92.82});
 tracker.defineNpcType('bomb', {width: 48.96, height: 105.48});
 tracker.defineNpcType('spider', {width: 52.8, height: 89.4});
-tracker.defineNpcType('wind-up fish', {width: 35, height: 100});
+// tracker.defineNpcType('wind-up fish', {width: 35, height: 100});
 gameLoop.addListener(tracker.advanceTick);
 
 function Character(){
@@ -175,7 +175,47 @@ function game(gameObjects){
 
     ctx.fillStyle = 'black';
     gameObjects.npcs.forEach(npc => {
-        ctx.fillRect(npc.x,npc.y, 50, 100);
+        let objImage = null;
+
+        let objX = null;
+        let objY = null;
+
+        let drawX = null;
+        let drawY = null;
+
+        switch(npc.type){
+            case 'fish':
+                objImage = obj_fish;
+                objX = 672;
+                objY = 1326;
+                drawX = 47.04;
+                drawY = 92.82;
+                break;
+            case 'bomb':
+                objImage = obj_bomb;
+                objX = 816;
+                objY = 1758;
+                drawX = 48.96;
+                drawY = 105.48;
+                break;
+            case 'spider':
+                objImage = obj_spider;
+                objX = 1056;
+                objY = 1788;
+                drawX = 52.8;
+                drawY = 89.4;
+                break;
+            case 'rat':
+                objImage = obj_mouse;
+                objX = 246;
+                objY = 468;
+                drawX = 49.2;
+                drawY = 93.6;
+                break;
+        }
+
+        ctx.drawImage(objImage, 0, 0, objX, objY, npc.x, npc.y, drawX, drawY);
+        //ctx.fillRect(npc.x,npc.y, 50, 100);
     })
 
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
