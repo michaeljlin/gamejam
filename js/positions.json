@@ -1,0 +1,14 @@
+{
+    "player": {
+        "x": 34,
+        "y": 712,
+        "state": "normal | moving | eating | harm"
+    },
+    "npcs": [
+        {
+            "x": 35,
+            "y": 563,
+            "state": "normal | eaten | offscreen"
+        }
+    ]
+}
