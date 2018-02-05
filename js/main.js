@@ -19,6 +19,10 @@ var left2 = new Image();
 var right1 = new Image();
 var right2 = new Image();
 
+var explode1 = new Image();
+var explode2 = new Image();
+var explode3 = new Image();
+
 var obj_bomb = new Image();
 var obj_fish = new Image();
 var obj_mouse = new Image();
@@ -90,6 +94,10 @@ function initialize() {
     obj_mouse.src = './assets/images/obj-mouse.png';
     obj_spider.src = './assets/images/obj-spider.png';
 
+    explode1.src = './assets/images/ex1.png';
+    explode2.src = './assets/images/ex2.png';
+    explode3.src = './assets/images/ex3.png';
+
     heartFull.src = './assets/images/heartfull.png';
     heartEmpty.src = './assets/images/heartempty.png';
 
@@ -156,6 +164,8 @@ function game(gameObjects){
     // ctx.drawImage(obj_mouse, 0, 0, 246, 468, 100, 0, 49.2, 93.6); // 0.2 multiplier
     // ctx.drawImage(obj_fish, 0,0,672, 1326, 200, 0,  47.04, 92.82); //0.07 multiplier
     // ctx.drawImage(obj_bomb, 0,0, 816, 1758, 300,0 , 48.96, 105.48); //0.06 multiplier
+
+    ctx.drawImage(explode3, 0,0, 871, 720, 500, 0, 130.65, 108); // 0.15 multiplier
 
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
