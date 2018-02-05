@@ -35,7 +35,7 @@ const createEntityTracker = (function(global){
             this.collectGarbage();
             this.checkNewSpawns(timing);
 
-            tickCallback(this.getPositions);
+            tickCallback(this.getPositions());
         }
 
         setPlayerDirection(direction){
@@ -49,7 +49,7 @@ const createEntityTracker = (function(global){
             const acceleration = player.accelerationRate * player.direction;
             const maxSpeed = player.maxSpeed;
 
-            const endPosition = startPosition;
+            let endPosition = startPosition;
             player.setPosition(endPosition);
             let endVelocity = startVelocity + acceleration;
             if (Math.abs(endVelocity) > maxSpeed){
@@ -71,6 +71,17 @@ const createEntityTracker = (function(global){
 
         checkNewSpawns(timing){
 
+        }
+
+        getPositions(){
+            const positions = {
+                player: this._entities.player.getPosition(),
+                npcs: []
+            };
+
+            positions.player.state = "normal";
+
+            return positions;
         }
     }
 
