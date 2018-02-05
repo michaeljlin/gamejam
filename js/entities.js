@@ -3,20 +3,22 @@
 const createEntityTracker = (function(global){
     let tracker = null;
 
-    const createTracker = function(worldSize, playerStartPos, tickCallback){
+    const createTracker = function(worldSize, playerSize, playerStartPos, tickCallback){
         if (tracker === null){
-            tracker = new EntityTracker(playerStartPos, tickCallback);
+            tracker = new EntityTracker(playerSize, playerStartPos, tickCallback);
         }
         return tracker;
     };
 
     class EntityTracker {
-        constructor(playerStartPos, tickCallback){
+        constructor(playerSize, playerStartPos, tickCallback){
             this._tickCallback = tickCallback;
             this._entities = {
-                player: new PlayerEntity(playerStartPos),
+                player: new PlayerEntity(playerSize, playerStartPos),
                 npcs: []
             }
+            this._spawnPeriod = 2000;
+            this._spawnCountdown = this._spawnPeriod;
 
             this.advanceTick = this.advanceTick.bind(this);
             this.advancePlayer = this.advancePlayer.bind(this);
@@ -92,7 +94,11 @@ const createEntityTracker = (function(global){
     }
 
     class Entity {
-        constructor(position, velocity){
+        constructor(size, position, velocity){
+            this._size = {
+                width: size.width,
+                height: size.height
+            }
             this._position = {
                 x: position.x,
                 y: position.y
@@ -101,6 +107,40 @@ const createEntityTracker = (function(global){
                 x: velocity.x,
                 y: velocity.y
             };
+            Object.defineProperties(this._position, {
+                top: {
+                    enumerable: true,
+                    get: () => (this._position.y),
+                    set: newTop => {
+                        this._position.y = newTop;
+                        return this;
+                    }
+                },
+                left: {
+                    enumerable: true,
+                    get: () => (this._position.x),
+                    set: newLeft => {
+                        this._position.x = newLeft;
+                        return this;
+                    }
+                },
+                right: {
+                    enumerable: true,
+                    get: () => (this._position.x + this._size.width),
+                    set: newRight => {
+                        this._position.x = newRight - this._size.width;
+                        return this;
+                    }
+                },
+                bottom: {
+                    enumerable: true,
+                    get: () => (this._position.y + this._size.height),
+                    set: newBottom => {
+                        this._position.y = newBottom - this._size.height;
+                        return this;
+                    }
+                },
+            });
         }
 
         getPosition(){
@@ -131,8 +171,8 @@ const createEntityTracker = (function(global){
     }
 
     class PlayerEntity extends Entity {
-        constructor(startPosition){
-            super(startPosition, {x: 0, y: 0});
+        constructor(size, startPosition){
+            super(size, startPosition, {x: 0, y: 0});
 
             this.direction = 0;
             this.maxSpeed = 0.4;
