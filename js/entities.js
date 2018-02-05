@@ -46,8 +46,8 @@ const createEntityTracker = (function(global){
             return this._entities.player.setDirection(direction);
         }
 
-        defineNpcType(name, size, spawnWeight = timestamp => 1){
-            this._npcTypes.set(name, {size, spawnWeight});
+        defineNpcType(name, size, harmful = false, spawnWeight = timestamp => 1){
+            this._npcTypes.set(name, {size, harmful, spawnWeight});
             return this;
         }
 
@@ -104,8 +104,13 @@ const createEntityTracker = (function(global){
                     && (player._position.top < npc._position.bottom);
                 if (horizontalOverlap && verticalOverlap){
                     npc.setState('eaten');
-                    player.setState('eating');
-                    console.log(`Collision with ${npc.getType()}!`);
+                    if (player.getState() !== 'harmed'){
+                        const newPlayerState = (this._npcTypes.get(npc.getType()).harmful)
+                            ? 'harmed'
+                            : 'eating';
+                        player.setState('eating');
+                        console.log(`Collision with ${npc.getType()}! New player state: ${newPlayerState}`);
+                    }
                 }
             });
         }
