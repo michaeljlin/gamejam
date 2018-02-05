@@ -19,6 +19,11 @@ var left2 = new Image();
 var right1 = new Image();
 var right2 = new Image();
 
+var heartFull = new Image();
+var heartEmpty = new Image();
+
+var heartBar = [];
+
 var char = {
     x: 570,
     y: 500
@@ -32,6 +37,13 @@ var velX = 0;
 var friction = 0.7;
 
 var animationCounter = 0;
+
+const tracker = createEntityTracker({x: 1280, y: 720}, {x: 570, y: 500}, game);
+gameLoop.addListener(tracker.advanceTick);
+
+// function trackerCallback(){
+//     // render from givens positions
+// }
 
 function Character(){
     this.x = 570;
@@ -59,6 +71,21 @@ function initialize() {
     right1.src = './assets/images/right1.png';
     right2.src = './assets/images/right2.png';
 
+    heartFull.src = './assets/images/heartfull.png';
+    heartEmpty.src = './assets/images/heartempty.png';
+
+    heartBar = [
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull
+    ];
+
     groundImg.src = './assets/images/ground.png';
     skyImg.src = './assets/images/cloud sky.png';
 
@@ -72,10 +99,23 @@ function initialize() {
 
     ctx.translate(0,0);
 
-    requestAnimationFrame(game);
+    gameLoop.start();
+
+    // requestAnimationFrame(game);
 }
 
-function game(){
+function handleDamage(){
+    for(let counter = heartBar.length; counter >=0; counter--){
+        if( $(heartBar[counter]).attr('src') === './assets/images/heartfull.png'){
+            heartBar[counter] = heartEmpty;
+            break;
+        }
+    }
+}
+
+function game(gameObjects){
+
+    // console.log('gameobj, ',gameObjects);
 
     ctx.clearRect(0,0,1280, 720);
 
@@ -84,6 +124,10 @@ function game(){
 
     ctx.drawImage(skyImg, 0,0, 1920, 1080, 0,0, 1280, 720);
     ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
+
+    heartBar.map(function(heart, index){
+        ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
+    });
 
     if(keys[16]){
         faster = 2;
@@ -133,12 +177,12 @@ function game(){
     // ctx.fillStyle = 'black';
     // ctx.fillRect(char.x,char.y,50,50);
 
-    ctx.drawImage(playerImg, char.x, char.y, 155.55, 191.25);
+    ctx.drawImage(playerImg, gameObjects.player.x, 500, 155.55, 191.25);
 
     animationCounter++;
 
     if(keys[37] === false && keys[39] === false){
-        if(animationCounter >= 20){
+        if(animationCounter >= 15){
 
             if($(playerImg).attr('src') !== './assets/images/stand.png' && $(playerImg).attr('src') !== './assets/images/stand2.png'){
                 playerImg = stand1;
@@ -160,7 +204,7 @@ function game(){
             playerImg = left1;
         }
 
-        if(animationCounter >= 7){
+        if(animationCounter >= 10){
             if($(playerImg).attr('src') === './assets/images/left1.png'){
                 playerImg = left2;
                 animationCounter = 0;
@@ -177,7 +221,7 @@ function game(){
             playerImg = right1;
         }
 
-        if(animationCounter >= 7){
+        if(animationCounter >= 10){
             if($(playerImg).attr('src') === './assets/images/right1.png'){
                 playerImg = right2;
                 animationCounter = 0;
@@ -188,16 +232,25 @@ function game(){
             }
         }
     }
-
-    requestAnimationFrame(game);
 };
 
 $(document).on("keydown", function (e) {
     keys[e.keyCode] = true;
+
+    if(keys[37]){
+        tracker.setPlayerDirection(-1);
+    }
+    else if(keys[39]){
+        tracker.setPlayerDirection(1);
+    }
 
     console.log('key pressed: ', e.keyCode);
 });
 
 $(document).on("keyup", function (e) {
     keys[e.keyCode] = false;
+
+    if(!keys[37] && !keys[39]){
+        tracker.setPlayerDirection(0);
+    }
 });
