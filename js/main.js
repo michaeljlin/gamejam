@@ -136,7 +136,7 @@ function initialize() {
     backgroundMusic.loop = true;
     backgroundMusic.play();
 
-    gameoverSound.loop = true;
+    // gameoverSound.loop = true;
     gameoverSound.volume = 0.5;
 
     gameLoop.start();
