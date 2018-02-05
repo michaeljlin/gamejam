@@ -2,12 +2,20 @@ $(document).ready(initialize);
 
 var keys = [];
 
+keys[37] = false;
+keys[39] = false;
+
 var canvas = null;
 var ctx = null;
 
 var groundImg = new Image();
 var playerImg = new Image();
 var skyImg = new Image();
+
+var stand1 = new Image();
+var stand2 = new Image();
+var left1 = new Image();
+var left2 = new Image();
 
 var char = {
     x: 570,
@@ -41,6 +49,12 @@ function initialize() {
     });
 
     playerImg.src = './assets/images/stand.png';
+
+    stand1.src = './assets/images/stand.png';
+    stand2.src = './assets/images/stand2.png';
+    left1.src = './assets/images/left1.png';
+    left2.src = './assets/images/left2.png';
+
     groundImg.src = './assets/images/ground.png';
     skyImg.src = './assets/images/cloud sky.png';
 
@@ -119,26 +133,42 @@ function game(){
 
     animationCounter++;
 
-    if(!keys[37] && !keys[39]){
+    if(keys[37] === false && keys[39] === false){
         if(animationCounter >= 30){
 
             if($(playerImg).attr('src') !== './assets/images/stand.png' && $(playerImg).attr('src') !== './assets/images/stand2.png'){
-                playerImg.src = './assets/images/stand.png';
+                playerImg = stand1;
             }
 
             if($(playerImg).attr('src') === './assets/images/stand.png'){
-                playerImg.src = './assets/images/stand2.png';
+                playerImg = stand2;
                 animationCounter = 0;
             }
             else{
-                playerImg.src = './assets/images/stand.png';
+                playerImg = stand1;
                 animationCounter = 0;
             }
         }
     }
-    else{
-        if(animationCounter >= 30){
+    else if(keys[37]){
 
+        if($(playerImg).attr('src') !== './assets/images/left1.png' && $(playerImg).attr('src') !== './assets/images/left2.png'){
+            playerImg = left1;
+        }
+
+        if(animationCounter >= 7){
+            if($(playerImg).attr('src') === './assets/images/left1.png'){
+                console.log('left1!');
+
+                playerImg = left2;
+                animationCounter = 0;
+            }
+            else{
+                console.log('left2!');
+
+                playerImg = left1;
+                animationCounter = 0;
+            }
         }
     }
 
