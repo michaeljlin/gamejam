@@ -33,6 +33,13 @@ var friction = 0.7;
 
 var animationCounter = 0;
 
+const tracker = createEntityTracker({x: 1280, y: 720}, {x: 570, y: 500}, game);
+gameLoop.addListener(tracker.advanceTick);
+
+// function trackerCallback(){
+//     // render from givens positions
+// }
+
 function Character(){
     this.x = 570;
     this.y = 500;
@@ -72,10 +79,10 @@ function initialize() {
 
     ctx.translate(0,0);
 
-    requestAnimationFrame(game);
+    // requestAnimationFrame(game);
 }
 
-function game(){
+function game(gameObjects){
 
     ctx.clearRect(0,0,1280, 720);
 
@@ -194,6 +201,14 @@ function game(){
 
 $(document).on("keydown", function (e) {
     keys[e.keyCode] = true;
+
+    // if(keys[37]){
+    //     tracker.setDirection(-1);
+    // }
+    // else if(keys[39]){
+    //     tracker.setDirection(1);
+    // }
+
 
     console.log('key pressed: ', e.keyCode);
 });
