@@ -71,8 +71,8 @@ function initialize() {
     right1.src = './assets/images/right1.png';
     right2.src = './assets/images/right2.png';
 
-    heartFull.src = './assets/images/heartfull.bmp';
-    heartEmpty.src = './assets/images/heartempty.bmp';
+    heartFull.src = './assets/images/heartfull.png';
+    heartEmpty.src = './assets/images/heartempty.png';
 
     heartBar = [
         heartFull,
@@ -104,6 +104,15 @@ function initialize() {
     // requestAnimationFrame(game);
 }
 
+function handleDamage(){
+    for(let counter = heartBar.length; counter >=0; counter--){
+        if( $(heartBar[counter]).attr('src') === './assets/images/heartfull.png'){
+            heartBar[counter] = heartEmpty;
+            break;
+        }
+    }
+}
+
 function game(gameObjects){
 
     // console.log('gameobj, ',gameObjects);
@@ -117,7 +126,7 @@ function game(gameObjects){
     ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
 
     heartBar.map(function(heart, index){
-        ctx.drawImage(heart, 0,0,160,120, 50*index, 50, 40, 30);
+        ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
     });
 
     if(keys[16]){
@@ -234,7 +243,6 @@ $(document).on("keydown", function (e) {
     else if(keys[39]){
         tracker.setPlayerDirection(1);
     }
-
 
     console.log('key pressed: ', e.keyCode);
 });
