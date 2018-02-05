@@ -165,7 +165,7 @@ const createEntityTracker = (function(global){
             const npc = new NonPlayerEntity(
                 type,
                 size,
-                {x: startX, y: 0},
+                {x: startX, y: -size.height},
                 {x: 0, y: 2}
             );
             this._entities.npcs.push(npc);
