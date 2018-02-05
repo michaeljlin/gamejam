@@ -88,11 +88,11 @@ const createEntityTracker = (function(global){
             const player = this._entities.player;
             this._entities.npcs.forEach(npc => {
                 const horizontalOverlap = 
-                    (npc._position.left > player._position.right)
-                    && (player._position.left > npc._position.right);
+                    (npc._position.left < player._position.right)
+                    && (player._position.left < npc._position.right);
                 const verticalOverlap = 
-                    (npc._position.top > player._position.bottom)
-                    && (player._position.top > npc._position.bottom);
+                    (npc._position.top < player._position.bottom)
+                    && (player._position.top < npc._position.bottom);
                 if (horizontalOverlap && verticalOverlap){
                     npc.setState('eaten');
                     player.setState('eating');
@@ -145,13 +145,13 @@ const createEntityTracker = (function(global){
 
         spawnNpc(type){
             const size = this._npcTypes.get(type).size;
-            const startX = Math.random() * (this._worldSize - size.width);
+            const startX = Math.random() * (this._worldSize.x - size.width);
 
             const npc = new NonPlayerEntity(
                 type,
                 size,
                 {x: startX, y: 0},
-                {x: 0, y: 0.15}
+                {x: 0, y: 2}
             );
             this._entities.npcs.push(npc);
         }
@@ -163,6 +163,7 @@ const createEntityTracker = (function(global){
                     const position = npc.getPosition();
                     position.type = npc.getType();
                     position.state = npc.getState();
+                    return position;
                 })
             };
 
