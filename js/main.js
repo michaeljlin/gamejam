@@ -21,6 +21,15 @@ var velY = 0;
 var velX = 0;
 var friction = 0.7;
 
+var animationCounter = 0;
+
+function Character(){
+    this.x = 570;
+    this.y = 500;
+
+
+}
+
 function initialize() {
 
     canvas = document.getElementById('canvas');
@@ -31,7 +40,7 @@ function initialize() {
         'height':"720px"
     });
 
-    playerImg.src = './assets/images/Cat eat.png';
+    playerImg.src = './assets/images/stand.png';
     groundImg.src = './assets/images/ground.png';
     skyImg.src = './assets/images/cloud sky.png';
 
@@ -107,6 +116,31 @@ function game(){
     // ctx.fillRect(char.x,char.y,50,50);
 
     ctx.drawImage(playerImg, char.x, char.y, 155.55, 191.25);
+
+    animationCounter++;
+
+    if(!keys[37] && !keys[39]){
+        if(animationCounter >= 30){
+
+            if($(playerImg).attr('src') !== './assets/images/stand.png' && $(playerImg).attr('src') !== './assets/images/stand2.png'){
+                playerImg.src = './assets/images/stand.png';
+            }
+
+            if($(playerImg).attr('src') === './assets/images/stand.png'){
+                playerImg.src = './assets/images/stand2.png';
+                animationCounter = 0;
+            }
+            else{
+                playerImg.src = './assets/images/stand.png';
+                animationCounter = 0;
+            }
+        }
+    }
+    else{
+        if(animationCounter >= 30){
+
+        }
+    }
 
     requestAnimationFrame(game);
 };
