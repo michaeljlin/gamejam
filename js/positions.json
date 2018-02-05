@@ -3,6 +3,7 @@
         "x": 34,
         "y": 712,
         "state": "normal | moving | eating | harmed | dead",
+        "score": 54,
         "health": {
             "current": 4,
             "maximum": 9

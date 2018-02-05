@@ -33,6 +33,17 @@ const gameLoop = (function(global){
         queue: [],
         map: new Map()
     };
+    const windowBlurHandler = () => {
+        main.pause(true);
+        global.removeEventListener('blur', windowBlurHandler);
+        global.addEventListener('focus', windowFocusHandler);
+    };
+
+    const windowFocusHandler = () => {
+        main.start();
+        global.removeEventListener('focus', windowFocusHandler);
+        global.addEventListener('blur', windowBlurHandler);
+    };
 
     /**
      * Starts game loop
@@ -41,6 +52,9 @@ const gameLoop = (function(global){
         if (timeout === null){
             tickStart = performance.now();
             timeout = global.requestAnimationFrame(main);
+
+            global.addEventListener('blur', windowBlurHandler);
+
             return true;
         }
         return false;
@@ -49,7 +63,11 @@ const gameLoop = (function(global){
     /**
      * Pauses game loop
      */
-    main.pause = function(){
+    main.pause = function(automatic = false){
+        if (!automatic){
+            global.removeEventListener('blur', windowBlurHandler);
+            global.removeEventListener('focus', windowFocusHandler);
+        }
         if (timeout !== null){
             global.cancelAnimationFrame(timeout);
             tickStart = null;
