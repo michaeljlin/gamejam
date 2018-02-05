@@ -19,6 +19,11 @@ var left2 = new Image();
 var right1 = new Image();
 var right2 = new Image();
 
+var obj_bomb = new Image();
+var obj_fish = new Image();
+var obj_mouse = new Image();
+var obj_spider = new Image();
+
 var death = new Image();
 var deathState = false;
 var reachTop = false;
@@ -70,6 +75,11 @@ function initialize() {
     right2.src = './assets/images/right2.png';
     death.src = './assets/images/death.png';
 
+    obj_bomb.src = './assets/images/obj-bomb.png';
+    obj_fish.src = './assets/images/obj-fish.png';
+    obj_mouse.src = './assets/images/obj-mouse.png';
+    obj_spider.src = './assets/images/obj-spider.png';
+
     heartFull.src = './assets/images/heartfull.png';
     heartEmpty.src = './assets/images/heartempty.png';
 
@@ -104,17 +114,15 @@ function handleDamage(){
 
             if(counter === 0){
                 handleDeath();
-                deathState = true;
             }
-
             break;
         }
-
     }
 }
 
 function handleDeath(){
     playerImg = death;
+    deathState = true;
 }
 
 function game(gameObjects){
@@ -132,6 +140,12 @@ function game(gameObjects){
     heartBar.map(function(heart, index){
         ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
     });
+
+
+    // ctx.drawImage(obj_spider, 0,0, 1056, 1788, 0,0, 52.8, 89.4); // 0.07 multiplier
+    // ctx.drawImage(obj_mouse, 0, 0, 246, 468, 100, 0, 49.2, 93.6); // 0.2 multiplier
+    // ctx.drawImage(obj_fish, 0,0,672, 1326, 200, 0,  47.04, 92.82); //0.07 multiplier
+    // ctx.drawImage(obj_bomb, 0,0, 816, 1758, 300,0 , 48.96, 105.48); //0.06 multiplier
 
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
