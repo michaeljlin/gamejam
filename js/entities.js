@@ -128,8 +128,8 @@ const createEntityTracker = (function(global){
             super(startPosition, {x: 0, y: 0});
 
             this.direction = 0;
-            this.maxSpeed = 10;
-            this.accelerationRate = 0.001;
+            this.maxSpeed = .4;
+            this.accelerationRate = 0.03;
         }
 
         setDirection(direction){
