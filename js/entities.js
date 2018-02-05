@@ -3,24 +3,26 @@
 const createEntityTracker = (function(global){
     let tracker = null;
 
-    const createTracker = function(worldSize, playerStartPos){
+    const createTracker = function(worldSize, playerStartPos, tickCallback){
         if (tracker === null){
-            tracker = new EntityTracker(playerStartPos);
+            tracker = new EntityTracker(playerStartPos, tickCallback);
         }
         return tracker;
     };
 
     class EntityTracker {
-        constructor(playerStartPos){
-            this._playerDirection = 0;
-            this._player = {
-                direction: 0,
-                entity: new PlayerEntity(playerStartPos)
+        constructor(playerStartPos, tickCallback){
+            this._entities = {
+                player: {
+                    direction: 0,
+                    entity: new PlayerEntity(playerStartPos)
+                },
+                npcs: []
             }
 
             this.advanceTick = this.advanceTick.bind(this);
             this.advancePlayer = this.advancePlayer.bind(this);
-            this.advanceEntities = this.advanceEntities.bind(this);
+            this.advanceNpcs = this.advanceNpcs.bind(this);
             this.checkCollisions = this.checkCollisions.bind(this);
             this.collectGarbage = this.collectGarbage.bind(this);
             this.checkNewSpawns = this.checkNewSpawns.bind(this);
@@ -28,25 +30,34 @@ const createEntityTracker = (function(global){
 
         advanceTick(timing){
             this.advancePlayer(timing);
-            this.advanceEntities(timing);
+            this.advanceNpcs(timing);
             this.checkCollisions();
             this.collectGarbage();
             this.checkNewSpawns(timing);
+
+            tickCallback(this.getPositions);
         }
 
         setPlayerDirection(direction){
-            if ([-1, 0, 1].includes(direction)){
-                this._playerDirection = direction;
-                return direction;
-            }
-            throw new TypeError(`${direction} is not a valid direction`);
+            this._entities.player.setDirection(direction);
         }
 
         advancePlayer(timing){
+            const player = this._entities.player;
+            const startVelocity = player.getVelocity().x;
+            const startPosition = player.getPosition().x;
+            const acceleration = player.accelerationRate * player.direction;
+            const maxSpeed = player.maxSpeed;
 
+            const endPosition = startPosition;
+            player.setPosition(endPosition);
+            let endVelocity = startVelocity + acceleration;
+            if (Math.abs(endVelocity) > maxSpeed){
+                endVelocity = maxSpeed * Math.sign(endVelocity);
+            }
         }
 
-        advanceEntities(timing){
+        advanceNpcs(timing){
 
         }
 
@@ -64,11 +75,67 @@ const createEntityTracker = (function(global){
     }
 
     class Entity {
+        constructor(position, velocity){
+            this._position.x = position.x;
+            this._position.y = position.y;
+            this._velocity.x = velocity.x;
+            this._velocity.y = velocity.y;
+        }
 
+        getPosition(){
+            return {
+                x: this._position.x,
+                y: this._position.y
+            };
+        }
+
+        setPosition(x, y){
+            this._position.x = x;
+            this._position.y = y;
+            return this;
+        }
+
+        getVelocity(){
+            return {
+                x: this._velocity.x,
+                y: this._velocity.y
+            };
+        }
+
+        setVelocity(x, y){
+            this._velocity.x = x;
+            this._velocity.y = y;
+            return this;
+        }
     }
 
     class PlayerEntity extends Entity {
-        
+        constructor(startPosition){
+            super(startPosition, {x: 0, y: 0});
+
+            this.direction = 0;
+            this.maxSpeed = 10;
+            this.accelerationRate = 0.001;
+        }
+
+        setDirection(){
+            if ([-1, 0, 1].includes(direction)){
+                this.direction = direction;
+                return direction;
+            }
+            throw new TypeError(`${direction} is not a valid direction`);
+        }
+
+        setVelocity(x){
+            this._velocity.x = x;
+            return this;
+        }
+    }
+
+    class NonPlayerEntity extends Entity {
+        constructor(startPosition, startVelocity){
+            super(startPosition, startVelocity);
+        }
     }
 
     return createTracker;
