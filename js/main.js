@@ -217,4 +217,8 @@ $(document).on("keydown", function (e) {
 
 $(document).on("keyup", function (e) {
     keys[e.keyCode] = false;
+
+    if(!keys[37] && !keys[39]){
+        tracker.setPlayerDirection(0);
+    }
 });
