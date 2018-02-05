@@ -175,6 +175,7 @@ const createEntityTracker = (function(global){
             super(size, startPosition, {x: 0, y: 0});
 
             this.direction = 0;
+
             this.maxSpeed = 0.4;
             this.accelerationRate = 0.03;
             this.frictionRate = 0.03;

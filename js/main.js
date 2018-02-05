@@ -2,14 +2,30 @@ $(document).ready(initialize);
 
 var keys = [];
 
+keys[37] = false;
+keys[39] = false;
+
 var canvas = null;
 var ctx = null;
 
 var groundImg = new Image();
 var playerImg = new Image();
+var skyImg = new Image();
+
+var stand1 = new Image();
+var stand2 = new Image();
+var left1 = new Image();
+var left2 = new Image();
+var right1 = new Image();
+var right2 = new Image();
+
+var heartFull = new Image();
+var heartEmpty = new Image();
+
+var heartBar = [];
 
 var char = {
-    x: 640,
+    x: 570,
     y: 500
 };
 
@@ -19,6 +35,22 @@ var baseSpeed = 3;
 var velY = 0;
 var velX = 0;
 var friction = 0.7;
+
+var animationCounter = 0;
+
+const tracker = createEntityTracker({x: 1280, y: 720}, {x: 570, y: 500}, game);
+gameLoop.addListener(tracker.advanceTick);
+
+// function trackerCallback(){
+//     // render from givens positions
+// }
+
+function Character(){
+    this.x = 570;
+    this.y = 500;
+
+
+}
 
 function initialize() {
 
@@ -30,8 +62,32 @@ function initialize() {
         'height':"720px"
     });
 
-    playerImg.src = './assets/images/Cat eat.png';
+    playerImg.src = './assets/images/stand.png';
+
+    stand1.src = './assets/images/stand.png';
+    stand2.src = './assets/images/stand2.png';
+    left1.src = './assets/images/left1.png';
+    left2.src = './assets/images/left2.png';
+    right1.src = './assets/images/right1.png';
+    right2.src = './assets/images/right2.png';
+
+    heartFull.src = './assets/images/heartfull.bmp';
+    heartEmpty.src = './assets/images/heartempty.bmp';
+
+    heartBar = [
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull,
+        heartFull
+    ];
+
     groundImg.src = './assets/images/ground.png';
+    skyImg.src = './assets/images/cloud sky.png';
 
     // playerImg.onload = function(){
     //     ctx.drawImage(img, playerX, playerY, 50, 50);
@@ -43,17 +99,26 @@ function initialize() {
 
     ctx.translate(0,0);
 
-    requestAnimationFrame(game);
+    gameLoop.start();
+
+    // requestAnimationFrame(game);
 }
 
-function game(){
+function game(gameObjects){
+
+    // console.log('gameobj, ',gameObjects);
 
     ctx.clearRect(0,0,1280, 720);
 
     ctx.fillStyle = 'white';
     ctx.fillRect(0,0,1280,720);
 
-    ctx.drawImage(groundImg, 0, 0, 1080, 1920, 0, 0, 1280, 1280);
+    ctx.drawImage(skyImg, 0,0, 1920, 1080, 0,0, 1280, 720);
+    ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
+
+    heartBar.map(function(heart, index){
+        ctx.drawImage(heart, 0,0,160,120, 50*index, 50, 40, 30);
+    });
 
     if(keys[16]){
         faster = 2;
@@ -103,17 +168,81 @@ function game(){
     // ctx.fillStyle = 'black';
     // ctx.fillRect(char.x,char.y,50,50);
 
-    ctx.drawImage(playerImg, char.x, char.y, 155.55, 191.25);
+    ctx.drawImage(playerImg, gameObjects.player.x, 500, 155.55, 191.25);
 
-    requestAnimationFrame(game);
+    animationCounter++;
+
+    if(keys[37] === false && keys[39] === false){
+        if(animationCounter >= 15){
+
+            if($(playerImg).attr('src') !== './assets/images/stand.png' && $(playerImg).attr('src') !== './assets/images/stand2.png'){
+                playerImg = stand1;
+            }
+
+            if($(playerImg).attr('src') === './assets/images/stand.png'){
+                playerImg = stand2;
+                animationCounter = 0;
+            }
+            else{
+                playerImg = stand1;
+                animationCounter = 0;
+            }
+        }
+    }
+    else if(keys[37]){
+
+        if($(playerImg).attr('src') !== './assets/images/left1.png' && $(playerImg).attr('src') !== './assets/images/left2.png'){
+            playerImg = left1;
+        }
+
+        if(animationCounter >= 10){
+            if($(playerImg).attr('src') === './assets/images/left1.png'){
+                playerImg = left2;
+                animationCounter = 0;
+            }
+            else{
+                playerImg = left1;
+                animationCounter = 0;
+            }
+        }
+    }
+    else if(keys[39]){
+
+        if($(playerImg).attr('src') !== './assets/images/right1.png' && $(playerImg).attr('src') !== './assets/images/right2.png'){
+            playerImg = right1;
+        }
+
+        if(animationCounter >= 10){
+            if($(playerImg).attr('src') === './assets/images/right1.png'){
+                playerImg = right2;
+                animationCounter = 0;
+            }
+            else{
+                playerImg = right1;
+                animationCounter = 0;
+            }
+        }
+    }
 };
 
 $(document).on("keydown", function (e) {
     keys[e.keyCode] = true;
+
+    if(keys[37]){
+        tracker.setPlayerDirection(-1);
+    }
+    else if(keys[39]){
+        tracker.setPlayerDirection(1);
+    }
+
 
     console.log('key pressed: ', e.keyCode);
 });
 
 $(document).on("keyup", function (e) {
     keys[e.keyCode] = false;
+
+    if(!keys[37] && !keys[39]){
+        tracker.setPlayerDirection(0);
+    }
 });
