@@ -132,10 +132,12 @@ function initialize() {
 
     ctx.translate(0,0);
 
+    backgroundMusic.volume = 0.5;
     backgroundMusic.loop = true;
     backgroundMusic.play();
 
-    gameoverSound.loop = true;
+    // gameoverSound.loop = true;
+    gameoverSound.volume = 0.5;
 
     gameLoop.start();
 }
