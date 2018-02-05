@@ -32,6 +32,9 @@ var death = new Image();
 var deathState = false;
 var reachTop = false;
 
+var explodeState = false;
+var explodeFade = 1;
+
 var heartFull = new Image();
 var heartEmpty = new Image();
 
@@ -143,6 +146,11 @@ function handleDeath(){
     deathState = true;
 }
 
+function handleExplode(){
+    explodeFade = 1;
+    explodeState = true;
+}
+
 function game(gameObjects){
 
     // console.log('gameobj, ',gameObjects);
@@ -165,11 +173,25 @@ function game(gameObjects){
     // ctx.drawImage(obj_fish, 0,0,672, 1326, 200, 0,  47.04, 92.82); //0.07 multiplier
     // ctx.drawImage(obj_bomb, 0,0, 816, 1758, 300,0 , 48.96, 105.48); //0.06 multiplier
 
-    ctx.drawImage(explode3, 0,0, 871, 720, 500, 0, 130.65, 108); // 0.15 multiplier
-
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
     animationCounter++;
+
+    if(explodeState){
+        ctx.save();
+
+        ctx.globalAlpha = explodeFade;
+        ctx.drawImage(explode3, 0,0, 871, 720, gameObjects.player.x+15, char.y, 130.65, 108); // 0.15 multiplier
+
+        ctx.restore();
+
+        explodeFade -=0.05;
+
+        if(explodeFade <= 0){
+            explodeState = false;
+            explodeFade = 1;
+        }
+    }
 
     if(!deathState){
         if(keys[37] === false && keys[39] === false){
