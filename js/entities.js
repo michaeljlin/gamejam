@@ -129,7 +129,7 @@ const createEntityTracker = (function(global){
             this.accelerationRate = 0.001;
         }
 
-        setDirection(){
+        setDirection(direction){
             if ([-1, 0, 1].includes(direction)){
                 this.direction = direction;
                 return direction;
