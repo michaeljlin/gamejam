@@ -13,7 +13,8 @@ var damageSound = new Audio('./assets/sound/explosion.mp3');
 var eatMouse = new Audio('./assets/sound/eatMouse.mp3');
 var eatFish = new Audio('./assets/sound/eatFish.mp3');
 var gameoverSound = new Audio('./assets/sound/gameover.wav');
-
+var walkSound1 = new Audio('./assets/sound/SFX_Walk1.mp3');
+var walkSound2 = new Audio('./assets/sound/SFX_Walk3.mp3');
 
 var groundImg = new Image();
 var playerImg = new Image();
@@ -133,6 +134,9 @@ function initialize() {
     ctx.fillRect(0,0,1280,720);
 
     ctx.translate(0,0);
+
+    walkSound1.loop = true;
+    walkSound2.loop = true;
 
     backgroundMusic.volume = 0.5;
     backgroundMusic.loop = true;
@@ -283,6 +287,10 @@ function game(gameObjects){
         handleDeath();
     }
 
+    if(gameObjects.player.state === 'moving'){
+
+    }
+
     // if(gameObjects.player.state === 'eating'){
     //     handleEating();
     // }
@@ -382,8 +390,17 @@ $(document).on("keydown", function (e) {
 
     if(keys[37]){
         tracker.setPlayerDirection(-1);
+
+        if(walkSound1.paused){
+            walkSound1.play();
+        }
     }
     else if(keys[39]){
+
+        if(walkSound1.paused){
+            walkSound1.play();
+        }
+
         tracker.setPlayerDirection(1);
     }
 
@@ -394,6 +411,8 @@ $(document).on("keyup", function (e) {
     keys[e.keyCode] = false;
 
     if(!keys[37] && !keys[39]){
+
+        walkSound1.pause();
         tracker.setPlayerDirection(0);
     }
 });
