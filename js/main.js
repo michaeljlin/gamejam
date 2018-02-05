@@ -19,6 +19,10 @@ var left2 = new Image();
 var right1 = new Image();
 var right2 = new Image();
 
+var death = new Image();
+var deathState = false;
+var reachTop = false;
+
 var heartFull = new Image();
 var heartEmpty = new Image();
 
@@ -46,15 +50,9 @@ tracker.defineNpcType('spider', {width: 35, height: 100});
 tracker.defineNpcType('wind-up fish', {width: 35, height: 100});
 gameLoop.addListener(tracker.advanceTick);
 
-// function trackerCallback(){
-//     // render from givens positions
-// }
-
 function Character(){
     this.x = 570;
     this.y = 500;
-
-
 }
 
 function initialize() {
@@ -75,9 +73,10 @@ function initialize() {
     left2.src = './assets/images/left2.png';
     right1.src = './assets/images/right1.png';
     right2.src = './assets/images/right2.png';
+    death.src = './assets/images/death.png';
 
-    heartFull.src = './assets/images/heartfull.bmp';
-    heartEmpty.src = './assets/images/heartempty.bmp';
+    heartFull.src = './assets/images/heartfull.png';
+    heartEmpty.src = './assets/images/heartempty.png';
 
     heartBar = [
         heartFull,
@@ -94,10 +93,6 @@ function initialize() {
     groundImg.src = './assets/images/ground.png';
     skyImg.src = './assets/images/cloud sky.png';
 
-    // playerImg.onload = function(){
-    //     ctx.drawImage(img, playerX, playerY, 50, 50);
-    // };
-
     ctx.fillStyle = 'white';
 
     ctx.fillRect(0,0,1280,720);
@@ -105,8 +100,26 @@ function initialize() {
     ctx.translate(0,0);
 
     gameLoop.start();
+}
 
-    // requestAnimationFrame(game);
+function handleDamage(){
+    for(let counter = heartBar.length; counter >=0; counter--){
+        if( $(heartBar[counter]).attr('src') === './assets/images/heartfull.png'){
+            heartBar[counter] = heartEmpty;
+
+            if(counter === 0){
+                handleDeath();
+                deathState = true;
+            }
+
+            break;
+        }
+
+    }
+}
+
+function handleDeath(){
+    playerImg = death;
 }
 
 function game(gameObjects){
@@ -122,112 +135,81 @@ function game(gameObjects){
     ctx.drawImage(groundImg, 0, 0, 1920, 1080, 0, 0, 1280, 720);
 
     heartBar.map(function(heart, index){
-        ctx.drawImage(heart, 0,0,160,120, 50*index, 50, 40, 30);
+        ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
     });
 
-    if(keys[16]){
-        faster = 2;
-        friction = 0.85;
-    }
-    else{
-        faster = 0;
-        friction = 0.7;
-    }
-
-    // if(keys[38]){
-    //     velY -=baseSpeed+faster;
-    // }
-    //
-    // if(keys[40]){
-    //     velY +=baseSpeed+faster;
-    // }
-
-    if(keys[39]){
-        velX +=baseSpeed+faster;
-    }
-
-    if(keys[37]){
-        velX -=baseSpeed+faster;
-    }
-
-    if(char.x >= 1150){
-        char.x = 1150;
-    }
-    else if(char.x <= 0){
-        char.x = 0;
-    }
-
-    if(char.y >= 670){
-        char.y = 670;
-    }
-    else if(char.y <= -10){
-        char.y = -10;
-    }
-
-    velY *= friction;
-    char.y += velY;
-
-    velX *= friction;
-    char.x += velX;
-
-    // ctx.fillStyle = 'black';
-    // ctx.fillRect(char.x,char.y,50,50);
-
-    ctx.drawImage(playerImg, gameObjects.player.x, 500, 155.55, 191.25);
+    ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
     animationCounter++;
 
-    if(keys[37] === false && keys[39] === false){
-        if(animationCounter >= 15){
+    if(!deathState){
+        if(keys[37] === false && keys[39] === false){
+            if(animationCounter >= 15){
 
-            if($(playerImg).attr('src') !== './assets/images/stand.png' && $(playerImg).attr('src') !== './assets/images/stand2.png'){
-                playerImg = stand1;
-            }
+                if($(playerImg).attr('src') !== './assets/images/stand.png' && $(playerImg).attr('src') !== './assets/images/stand2.png'){
+                    playerImg = stand1;
+                }
 
-            if($(playerImg).attr('src') === './assets/images/stand.png'){
-                playerImg = stand2;
-                animationCounter = 0;
-            }
-            else{
-                playerImg = stand1;
-                animationCounter = 0;
+                if($(playerImg).attr('src') === './assets/images/stand.png'){
+                    playerImg = stand2;
+                    animationCounter = 0;
+                }
+                else{
+                    playerImg = stand1;
+                    animationCounter = 0;
+                }
             }
         }
-    }
-    else if(keys[37]){
+        else if(keys[37]){
 
-        if($(playerImg).attr('src') !== './assets/images/left1.png' && $(playerImg).attr('src') !== './assets/images/left2.png'){
-            playerImg = left1;
-        }
-
-        if(animationCounter >= 10){
-            if($(playerImg).attr('src') === './assets/images/left1.png'){
-                playerImg = left2;
-                animationCounter = 0;
-            }
-            else{
+            if($(playerImg).attr('src') !== './assets/images/left1.png' && $(playerImg).attr('src') !== './assets/images/left2.png'){
                 playerImg = left1;
-                animationCounter = 0;
+            }
+
+            if(animationCounter >= 10){
+                if($(playerImg).attr('src') === './assets/images/left1.png'){
+                    playerImg = left2;
+                    animationCounter = 0;
+                }
+                else{
+                    playerImg = left1;
+                    animationCounter = 0;
+                }
             }
         }
-    }
-    else if(keys[39]){
+        else if(keys[39]){
 
-        if($(playerImg).attr('src') !== './assets/images/right1.png' && $(playerImg).attr('src') !== './assets/images/right2.png'){
-            playerImg = right1;
-        }
-
-        if(animationCounter >= 10){
-            if($(playerImg).attr('src') === './assets/images/right1.png'){
-                playerImg = right2;
-                animationCounter = 0;
-            }
-            else{
+            if($(playerImg).attr('src') !== './assets/images/right1.png' && $(playerImg).attr('src') !== './assets/images/right2.png'){
                 playerImg = right1;
-                animationCounter = 0;
+            }
+
+            if(animationCounter >= 10){
+                if($(playerImg).attr('src') === './assets/images/right1.png'){
+                    playerImg = right2;
+                    animationCounter = 0;
+                }
+                else{
+                    playerImg = right1;
+                    animationCounter = 0;
+                }
             }
         }
     }
+    else{
+        // console.log('y: ',char.y);
+
+        if(char.y > 400 && !reachTop){
+            char.y-=10;
+        }
+        else if(char.y === 400 && !reachTop){
+            reachTop = true;
+        }
+        else if(top && char.y < 500){
+            char.y+=10;
+        }
+
+        $(document).off("keydown");
+    };
 };
 
 $(document).on("keydown", function (e) {
@@ -239,7 +221,6 @@ $(document).on("keydown", function (e) {
     else if(keys[39]){
         tracker.setPlayerDirection(1);
     }
-
 
     console.log('key pressed: ', e.keyCode);
 });
