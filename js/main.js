@@ -9,9 +9,11 @@ var canvas = null;
 var ctx = null;
 
 var backgroundMusic = new Audio('./assets/sound/Arcade-Puzzler.mp3');
-var damageSound = new Audio('./assets/sound/damage.wav');
-var eatSound = new Audio('./assets/sound/eat.wav');
+var damageSound = new Audio('./assets/sound/explosion.mp3');
+var eatMouse = new Audio('./assets/sound/eatMouse.mp3');
+var eatFish = new Audio('./assets/sound/eatFish.mp3');
 var gameoverSound = new Audio('./assets/sound/gameover.wav');
+
 
 var groundImg = new Image();
 var playerImg = new Image();
@@ -143,6 +145,8 @@ function initialize() {
 }
 
 function handleDamage(){
+    damageSound.play();
+
     for(let counter = heartBar.length; counter >=0; counter--){
         if( $(heartBar[counter]).attr('src') === './assets/images/heartfull.png'){
             heartBar[counter] = heartEmpty;
@@ -162,11 +166,20 @@ function handleDeath(){
     deathState = true;
 }
 
-function handleHeal(){
+// function handleEating(){
+//     eatSound.play();
+// };
 
-};
+function handleEatMouse(){
+    eatMouse.play();
+}
+
+function handleEatFish(){
+    eatFish.play();
+}
 
 function handleExplode(){
+    damageSound.play();
     explodeFade = 1;
     explodeState = true;
 }
@@ -238,6 +251,22 @@ function game(gameObjects){
                 break;
         }
 
+        if(npc.type === 'fish' && npc.state === 'eaten'){
+            handleEatFish();
+        }
+
+        if(npc.type === 'rat' && npc.state === 'eaten'){
+            handleEatMouse();
+        }
+
+        // if(npc.type === 'bomb' && npc.state === 'eaten'){
+        //     handleExplode();
+        // }
+        //
+        // if(npc.type === 'spider' && npc.state === 'eaten'){
+        //     damageSound.play();
+        // }
+
         ctx.drawImage(objImage, 0, 0, objX, objY, npc.x, npc.y, drawX, drawY);
         //ctx.fillRect(npc.x,npc.y, 50, 100);
     })
@@ -249,6 +278,10 @@ function game(gameObjects){
     if(gameObjects.player.state === 'dead'){
         handleDeath();
     }
+
+    // if(gameObjects.player.state === 'eating'){
+    //     handleEating();
+    // }
 
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
