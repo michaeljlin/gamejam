@@ -19,6 +19,7 @@ const createEntityTracker = (function(global){
             }
             this._npcTypes = new Map();
             this._spawnPeriod = timestamp => 2000;
+            this._timeSinceLastSpawn = 0;
 
             this.advanceTick = this.advanceTick.bind(this);
             this.advancePlayer = this.advancePlayer.bind(this);
@@ -30,9 +31,11 @@ const createEntityTracker = (function(global){
 
         advanceTick(timing){
             this.advancePlayer(timing);
-            this.advanceNpcs(timing);
-            this.checkCollisions();
-            this.collectGarbage();
+            if (this._entities.npcs.length > 0){
+                this.advanceNpcs(timing);
+                this.checkCollisions();
+                this.collectGarbage();
+            }
             this.checkNewSpawns(timing);
 
             this._tickCallback(this.getPositions());
@@ -83,6 +86,9 @@ const createEntityTracker = (function(global){
         }
 
         checkNewSpawns(timing){
+            if(this._npcTypes.keys().length === 0){
+                return;
+            }
             if (this.readyForSpawn(timing)){
                 const spawnType = this.determineSpawnType(timing);
                 this.spawnNpc(spawnType);
@@ -90,13 +96,19 @@ const createEntityTracker = (function(global){
         }
 
         readyForSpawn(timing){
-
+            this._timeSinceLastSpawn += timing.step;
+            const spawnPeriod = this._spawnPeriod(timing.gameTime);
+            if (this._timeSinceLastSpawn > spawnPeriod){
+                this._timeSinceLastSpawn -= spawnPeriod;
+                return true;
+            }
+            return false;
         }
 
         determineSpawnType(timing){
             const types = this._npcTypes.keys();
             const weights = types.map(type => (
-                this._npcTypes.get(type).spawnWeight(timing.end)
+                this._npcTypes.get(type).spawnWeight(timing.gameTime)
             ));
             const totalWeight = weights.reduce((acc, curr) => (acc + curr), 0);
             const percentages = weights.map(weight => weight / totalWeight);
@@ -110,7 +122,7 @@ const createEntityTracker = (function(global){
         }
 
         spawnNpc(type){
-
+            const npc = new NonPlayerEntity(type);
         }
 
         getPositions(){
@@ -228,8 +240,14 @@ const createEntityTracker = (function(global){
     }
 
     class NonPlayerEntity extends Entity {
-        constructor(startPosition, startVelocity){
-            super(startPosition, startVelocity);
+        constructor(type, startPosition, startVelocity){
+            super(this._npcTypes.get(type).size, startPosition, startVelocity);
+
+            this._type = type;
+        }
+
+        getType(){
+            return this._type;
         }
     }
 
