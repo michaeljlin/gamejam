@@ -5,13 +5,14 @@ const createEntityTracker = (function(global){
 
     const createTracker = function(worldSize, playerSize, playerStartPos, tickCallback){
         if (tracker === null){
-            tracker = new EntityTracker(playerSize, playerStartPos, tickCallback);
+            tracker = new EntityTracker(worldSize, playerSize, playerStartPos, tickCallback);
         }
         return tracker;
     };
 
     class EntityTracker {
-        constructor(playerSize, playerStartPos, tickCallback){
+        constructor(worldSize, playerSize, playerStartPos, tickCallback){
+            this._worldSize = worldSize;
             this._tickCallback = tickCallback;
             this._entities = {
                 player: new PlayerEntity(playerSize, playerStartPos),
@@ -30,28 +31,31 @@ const createEntityTracker = (function(global){
         }
 
         advanceTick(timing){
-            this.advancePlayer(timing);
-            if (this._entities.npcs.length > 0){
-                this.advanceNpcs(timing);
-                this.checkCollisions();
-                this.collectGarbage();
+            if (this._entities.player.getState() !== "dead"){
+                this.advancePlayer(timing);
+                if (this._entities.npcs.length > 0){
+                    this.collectGarbage();
+                    this.advanceNpcs(timing);
+                    this.checkCollisions();
+                }
+                this.checkNewSpawns(timing);
             }
-            this.checkNewSpawns(timing);
 
-            this._tickCallback(this.getPositions());
+            this._tickCallback(this.getState());
         }
 
         setPlayerDirection(direction){
             return this._entities.player.setDirection(direction);
         }
 
-        defineNpcType(name, size, spawnWeight = timestamp => 1){
-            this._npcTypes.set(name, {size, spawnWeight});
+        defineNpcType(name, size, harmful = false, spawnWeight = timestamp => 1){
+            this._npcTypes.set(name, {size, harmful, spawnWeight});
             return this;
         }
 
         advancePlayer(timing){
             const player = this._entities.player;
+            player.setState('normal');
             const startVelocityX = player.getVelocity().x;
             const startPosition = player.getPosition();
             if (player.direction){
@@ -66,6 +70,12 @@ const createEntityTracker = (function(global){
 
             let endPositionX = startPosition.x + startVelocityX * timing.step;
             player.setPosition(endPositionX, startPosition.y);
+            if (player._position.left < 0){
+                player._position.left = 0;
+            }
+            if (player._position.right > this._worldSize.x){
+                player._position.right = this._worldSize.x;
+            }
             let endVelocity = startVelocityX + acceleration;
             if (Math.abs(endVelocity) > maxSpeed){
                 endVelocity = maxSpeed * Math.sign(endVelocity);
@@ -74,15 +84,55 @@ const createEntityTracker = (function(global){
         }
 
         advanceNpcs(timing){
-
+            this._entities.npcs.forEach(npc => {
+                const startPosition = npc.getPosition();
+                const startVelocity = npc.getVelocity();
+                const endPositionY = startPosition.y + startVelocity.y;
+                npc.setPosition(startPosition.x, endPositionY);
+                if (endPositionY > this._worldSize.y){
+                    npc.setState("offscreen");
+                }
+            });
         }
 
         checkCollisions(){
-
+            const player = this._entities.player;
+            this._entities.npcs.forEach(npc => {
+                const horizontalOverlap = 
+                    (npc._position.left < player._position.right)
+                    && (player._position.left < npc._position.right);
+                const verticalOverlap = 
+                    (npc._position.top < player._position.bottom)
+                    && (player._position.top < npc._position.bottom);
+                if (horizontalOverlap && verticalOverlap){
+                    npc.setState('eaten');
+                    if (player.getState() !== 'harmed'){
+                        let newPlayerState = (this._npcTypes.get(npc.getType()).harmful)
+                            ? 'harmed'
+                            : 'eating';
+                        if (newPlayerState === 'harmed'){
+                            player.currentHealth--;
+                            if (player.currentHealth <= 0){
+                                newPlayerState = 'dead';
+                            }
+                        } else {
+                            player.setScore(player.getScore() + 1);
+                        }
+                        player.setState(newPlayerState);
+                        console.log(`Collision with ${npc.getType()}! Current health: ${player.currentHealth} New player state: ${newPlayerState}`);
+                    }
+                }
+            });
         }
 
         collectGarbage(){
-
+            const npcs = this._entities.npcs;
+            for (let i = npcs.length - 1; i >= 0; i--){
+                const state = npcs[i].getState();
+                if (["eaten", "offscreen"].includes(state)){
+                    npcs.splice(i, 1);
+                }
+            }
         }
 
         checkNewSpawns(timing){
@@ -111,9 +161,6 @@ const createEntityTracker = (function(global){
             this._npcTypes.forEach(type => {
                 weights.push(type.spawnWeight(timing.gameTime));
             })
-            // for (let i = 0; i < types.length; i++){
-            //     weights.push(this._npcTypes.get(type).spawnWeight(timing.gameTime));
-            // }
             const totalWeight = weights.reduce((acc, curr) => (acc + curr), 0);
             const percentages = weights.map(weight => weight / totalWeight);
             let remainingChance = Math.random();
@@ -127,25 +174,32 @@ const createEntityTracker = (function(global){
         }
 
         spawnNpc(type){
+            const size = this._npcTypes.get(type).size;
+            const startX = Math.random() * (this._worldSize.x - size.width);
+
             const npc = new NonPlayerEntity(
                 type,
-                this._npcTypes.get(type).size,
-                {x: 0, y: 0},
-                {x: 0, y: 0}
+                size,
+                {x: startX, y: -size.height},
+                {x: 0, y: 2}
             );
+            this._entities.npcs.push(npc);
         }
 
-        getPositions(){
+        getState(){
             const positions = {
                 player: this._entities.player.getPosition(),
                 npcs: this._entities.npcs.map(npc => {
                     const position = npc.getPosition();
                     position.type = npc.getType();
                     position.state = npc.getState();
+                    return position;
                 })
             };
 
             positions.player.state = this._entities.player.getState();
+            positions.player.health = this._entities.player.getHealth();
+            positions.player.score = this._entities.player.getScore();
 
             return positions;
         }
@@ -206,6 +260,11 @@ const createEntityTracker = (function(global){
             return this._state;
         }
 
+        setState(newState){
+            this._state = newState;
+            return this;
+        }
+
         getPosition(){
             return {
                 x: this._position.x,
@@ -242,6 +301,26 @@ const createEntityTracker = (function(global){
             this.maxSpeed = 0.4;
             this.accelerationRate = 0.03;
             this.frictionRate = 0.03;
+
+            this.score = 0;
+            this.maxHealth = 9;
+            this.currentHealth = this.maxHealth;
+        }
+
+        getHealth(){
+            return {
+                current: this.currentHealth,
+                maximum: this.maxHealth
+            };
+        }
+
+        getScore(){
+            return this.score;
+        }
+
+        setScore(points){
+            this.score = points;
+            return this;
         }
 
         setDirection(direction){
