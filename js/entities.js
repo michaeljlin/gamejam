@@ -42,14 +42,14 @@ const createEntityTracker = (function(global){
 
         advancePlayer(timing){
             const player = this._entities.player;
-            const startVelocity = player.getVelocity().x;
+            const startVelocityX = player.getVelocity().x;
             const startPosition = player.getPosition();
             const acceleration = player.accelerationRate * player.direction;
             const maxSpeed = player.maxSpeed;
 
-            let endPositionX = startPosition.x;
+            let endPositionX = startPosition.x + startVelocityX * timing.step;
             player.setPosition(endPositionX, startPosition.y);
-            let endVelocity = startVelocity + acceleration;
+            let endVelocity = startVelocityX + acceleration;
             if (Math.abs(endVelocity) > maxSpeed){
                 endVelocity = maxSpeed * Math.sign(endVelocity);
             }
