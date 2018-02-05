@@ -53,6 +53,7 @@ const createEntityTracker = (function(global){
             if (Math.abs(endVelocity) > maxSpeed){
                 endVelocity = maxSpeed * Math.sign(endVelocity);
             }
+            player.setVelocity(endVelocity);
         }
 
         advanceNpcs(timing){
