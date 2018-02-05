@@ -13,10 +13,7 @@ const createEntityTracker = (function(global){
     class EntityTracker {
         constructor(playerStartPos, tickCallback){
             this._entities = {
-                player: {
-                    direction: 0,
-                    entity: new PlayerEntity(playerStartPos)
-                },
+                player: new PlayerEntity(playerStartPos),
                 npcs: []
             }
 
