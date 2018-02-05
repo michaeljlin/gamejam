@@ -38,7 +38,7 @@ var friction = 0.7;
 
 var animationCounter = 0;
 
-const tracker = createEntityTracker({x: 1280, y: 720}, {x: 570, y: 500}, game);
+const tracker = createEntityTracker({x: 1280, y: 720}, {width: 155.55, height: 191.25}, char, game);
 gameLoop.addListener(tracker.advanceTick);
 
 // function trackerCallback(){
