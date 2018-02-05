@@ -9,13 +9,15 @@ const gameLoop = (function(global){
             return main.start();
         }
         const tickStep = tickEnd - tickStart;
+        gameTime += tickStep;
 
         if (tickStep > 0){
             listeners.queue.forEach(listenerId => {
                 listeners.map.get(listenerId)({
                     start: tickStart,
                     end: tickEnd,
-                    step: tickStep
+                    step: tickStep,
+                    gameTime: gameTime
                 });
             });
         }
@@ -26,6 +28,7 @@ const gameLoop = (function(global){
 
     let timeout = null;
     let tickStart = null;
+    let gameTime = 0;
     const listeners = {
         queue: [],
         map: new Map()
@@ -64,6 +67,7 @@ const gameLoop = (function(global){
         while(listeners.queue.length > 0){
             main.removeListener(listeners.queue[0]);
         }
+        gameTime = 0;
         return pause;
     };
 
