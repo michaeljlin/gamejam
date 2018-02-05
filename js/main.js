@@ -143,6 +143,8 @@ function initialize() {
 }
 
 function handleDamage(){
+    damageSound.play();
+
     for(let counter = heartBar.length; counter >=0; counter--){
         if( $(heartBar[counter]).attr('src') === './assets/images/heartfull.png'){
             heartBar[counter] = heartEmpty;
