@@ -5,13 +5,14 @@ const createEntityTracker = (function(global){
 
     const createTracker = function(worldSize, playerSize, playerStartPos, tickCallback){
         if (tracker === null){
-            tracker = new EntityTracker(playerSize, playerStartPos, tickCallback);
+            tracker = new EntityTracker(worldSize, playerSize, playerStartPos, tickCallback);
         }
         return tracker;
     };
 
     class EntityTracker {
-        constructor(playerSize, playerStartPos, tickCallback){
+        constructor(worldSize, playerSize, playerStartPos, tickCallback){
+            this._worldSize = worldSize;
             this._tickCallback = tickCallback;
             this._entities = {
                 player: new PlayerEntity(playerSize, playerStartPos),
@@ -52,6 +53,7 @@ const createEntityTracker = (function(global){
 
         advancePlayer(timing){
             const player = this._entities.player;
+            player.setState('normal');
             const startVelocityX = player.getVelocity().x;
             const startPosition = player.getPosition();
             if (player.direction){
@@ -74,11 +76,29 @@ const createEntityTracker = (function(global){
         }
 
         advanceNpcs(timing){
-
+            this._entities.npcs.forEach(npc => {
+                const startPosition = npc.getPosition();
+                const startVelocity = npc.getVelocity();
+                const endPositionY = startPosition.y + startVelocity.y;
+                npc.setPosition(startPosition.x, endPositionY);
+            });
         }
 
         checkCollisions(){
-
+            const player = this._entities.player;
+            this._entities.npcs.forEach(npc => {
+                const horizontalOverlap = 
+                    (npc._position.left < player._position.right)
+                    && (player._position.left < npc._position.right);
+                const verticalOverlap = 
+                    (npc._position.top < player._position.bottom)
+                    && (player._position.top < npc._position.bottom);
+                if (horizontalOverlap && verticalOverlap){
+                    npc.setState('eaten');
+                    player.setState('eating');
+                    console.log(`Collision with ${npc.getType()}!`);
+                }
+            });
         }
 
         collectGarbage(){
@@ -111,9 +131,6 @@ const createEntityTracker = (function(global){
             this._npcTypes.forEach(type => {
                 weights.push(type.spawnWeight(timing.gameTime));
             })
-            // for (let i = 0; i < types.length; i++){
-            //     weights.push(this._npcTypes.get(type).spawnWeight(timing.gameTime));
-            // }
             const totalWeight = weights.reduce((acc, curr) => (acc + curr), 0);
             const percentages = weights.map(weight => weight / totalWeight);
             let remainingChance = Math.random();
@@ -127,12 +144,16 @@ const createEntityTracker = (function(global){
         }
 
         spawnNpc(type){
+            const size = this._npcTypes.get(type).size;
+            const startX = Math.random() * (this._worldSize.x - size.width);
+
             const npc = new NonPlayerEntity(
                 type,
-                this._npcTypes.get(type).size,
-                {x: 0, y: 0},
-                {x: 0, y: 0}
+                size,
+                {x: startX, y: 0},
+                {x: 0, y: 2}
             );
+            this._entities.npcs.push(npc);
         }
 
         getPositions(){
@@ -142,6 +163,7 @@ const createEntityTracker = (function(global){
                     const position = npc.getPosition();
                     position.type = npc.getType();
                     position.state = npc.getState();
+                    return position;
                 })
             };
 
@@ -204,6 +226,11 @@ const createEntityTracker = (function(global){
 
         getState(){
             return this._state;
+        }
+
+        setState(newState){
+            this._state = newState;
+            return this;
         }
 
         getPosition(){
