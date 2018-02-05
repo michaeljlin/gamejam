@@ -3,20 +3,23 @@
 const createEntityTracker = (function(global){
     let tracker = null;
 
-    const createTracker = function(worldSize, playerStartPos, tickCallback){
+    const createTracker = function(worldSize, playerSize, playerStartPos, tickCallback){
         if (tracker === null){
-            tracker = new EntityTracker(playerStartPos, tickCallback);
+            tracker = new EntityTracker(playerSize, playerStartPos, tickCallback);
         }
         return tracker;
     };
 
     class EntityTracker {
-        constructor(playerStartPos, tickCallback){
+        constructor(playerSize, playerStartPos, tickCallback){
             this._tickCallback = tickCallback;
             this._entities = {
-                player: new PlayerEntity(playerStartPos),
+                player: new PlayerEntity(playerSize, playerStartPos),
                 npcs: []
             }
+            this._npcTypes = new Map();
+            this._spawnPeriod = timestamp => 2000;
+            this._timeSinceLastSpawn = 0;
 
             this.advanceTick = this.advanceTick.bind(this);
             this.advancePlayer = this.advancePlayer.bind(this);
@@ -28,16 +31,23 @@ const createEntityTracker = (function(global){
 
         advanceTick(timing){
             this.advancePlayer(timing);
-            this.advanceNpcs(timing);
-            this.checkCollisions();
-            this.collectGarbage();
+            if (this._entities.npcs.length > 0){
+                this.advanceNpcs(timing);
+                this.checkCollisions();
+                this.collectGarbage();
+            }
             this.checkNewSpawns(timing);
 
             this._tickCallback(this.getPositions());
         }
 
         setPlayerDirection(direction){
-            this._entities.player.setDirection(direction);
+            return this._entities.player.setDirection(direction);
+        }
+
+        defineNpcType(name, size, spawnWeight = timestamp => 1){
+            this._npcTypes.set(name, {size, spawnWeight});
+            return this;
         }
 
         advancePlayer(timing){
@@ -76,23 +86,78 @@ const createEntityTracker = (function(global){
         }
 
         checkNewSpawns(timing){
+            if(this._npcTypes.keys().length === 0){
+                return;
+            }
+            if (this.readyForSpawn(timing)){
+                const spawnType = this.determineSpawnType(timing);
+                this.spawnNpc(spawnType);
+            }
+        }
 
+        readyForSpawn(timing){
+            this._timeSinceLastSpawn += timing.step;
+            const spawnPeriod = this._spawnPeriod(timing.gameTime);
+            if (this._timeSinceLastSpawn > spawnPeriod){
+                this._timeSinceLastSpawn -= spawnPeriod;
+                return true;
+            }
+            return false;
+        }
+
+        determineSpawnType(timing){
+            const types = this._npcTypes.keys();
+            const weights = [];
+            this._npcTypes.forEach(type => {
+                weights.push(type.spawnWeight(timing.gameTime));
+            })
+            // for (let i = 0; i < types.length; i++){
+            //     weights.push(this._npcTypes.get(type).spawnWeight(timing.gameTime));
+            // }
+            const totalWeight = weights.reduce((acc, curr) => (acc + curr), 0);
+            const percentages = weights.map(weight => weight / totalWeight);
+            let remainingChance = Math.random();
+            for (let i = 0; i < percentages.length; i++){
+                remainingChance -= percentages[i];
+                const value = types.next().value;
+                if (remainingChance < 0){
+                    return value;
+                }
+            }
+        }
+
+        spawnNpc(type){
+            const npc = new NonPlayerEntity(
+                type,
+                this._npcTypes.get(type).size,
+                {x: 0, y: 0},
+                {x: 0, y: 0}
+            );
         }
 
         getPositions(){
             const positions = {
                 player: this._entities.player.getPosition(),
-                npcs: []
+                npcs: this._entities.npcs.map(npc => {
+                    const position = npc.getPosition();
+                    position.type = npc.getType();
+                    position.state = npc.getState();
+                })
             };
 
-            positions.player.state = "normal";
+            positions.player.state = this._entities.player.getState();
 
             return positions;
         }
     }
 
     class Entity {
-        constructor(position, velocity){
+        constructor(size, position, velocity){
+            this._state = "normal";
+            this._size = {
+                width: size.width,
+                height: size.height
+            }
             this._position = {
                 x: position.x,
                 y: position.y
@@ -101,6 +166,44 @@ const createEntityTracker = (function(global){
                 x: velocity.x,
                 y: velocity.y
             };
+            Object.defineProperties(this._position, {
+                top: {
+                    enumerable: true,
+                    get: () => (this._position.y),
+                    set: newTop => {
+                        this._position.y = newTop;
+                        return this;
+                    }
+                },
+                left: {
+                    enumerable: true,
+                    get: () => (this._position.x),
+                    set: newLeft => {
+                        this._position.x = newLeft;
+                        return this;
+                    }
+                },
+                right: {
+                    enumerable: true,
+                    get: () => (this._position.x + this._size.width),
+                    set: newRight => {
+                        this._position.x = newRight - this._size.width;
+                        return this;
+                    }
+                },
+                bottom: {
+                    enumerable: true,
+                    get: () => (this._position.y + this._size.height),
+                    set: newBottom => {
+                        this._position.y = newBottom - this._size.height;
+                        return this;
+                    }
+                },
+            });
+        }
+
+        getState(){
+            return this._state;
         }
 
         getPosition(){
@@ -131,8 +234,8 @@ const createEntityTracker = (function(global){
     }
 
     class PlayerEntity extends Entity {
-        constructor(startPosition){
-            super(startPosition, {x: 0, y: 0});
+        constructor(size, startPosition){
+            super(size, startPosition, {x: 0, y: 0});
 
             this.direction = 0;
 
@@ -156,8 +259,14 @@ const createEntityTracker = (function(global){
     }
 
     class NonPlayerEntity extends Entity {
-        constructor(startPosition, startVelocity){
-            super(startPosition, startVelocity);
+        constructor(type, size, startPosition, startVelocity){
+            super(size, startPosition, startVelocity);
+
+            this._type = type;
+        }
+
+        getType(){
+            return this._type;
         }
     }
 

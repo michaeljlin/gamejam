@@ -8,6 +8,7 @@
         {
             "x": 35,
             "y": 563,
+            "type": "fish | bomb | spider | rat | wind-up fish",
             "state": "normal | eaten | offscreen"
         }
     ]
