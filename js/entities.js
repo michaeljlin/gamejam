@@ -12,11 +12,9 @@ const createEntityTracker = (function(global){
 
     class EntityTracker {
         constructor(playerStartPos, tickCallback){
+            this._tickCallback = tickCallback;
             this._entities = {
-                player: {
-                    direction: 0,
-                    entity: new PlayerEntity(playerStartPos)
-                },
+                player: new PlayerEntity(playerStartPos),
                 npcs: []
             }
 
@@ -35,7 +33,7 @@ const createEntityTracker = (function(global){
             this.collectGarbage();
             this.checkNewSpawns(timing);
 
-            tickCallback(this.getPositions);
+            this._tickCallback(this.getPositions());
         }
 
         setPlayerDirection(direction){
@@ -44,17 +42,25 @@ const createEntityTracker = (function(global){
 
         advancePlayer(timing){
             const player = this._entities.player;
-            const startVelocity = player.getVelocity().x;
-            const startPosition = player.getPosition().x;
-            const acceleration = player.accelerationRate * player.direction;
+            const startVelocityX = player.getVelocity().x;
+            const startPosition = player.getPosition();
+            if (player.direction){
+                var acceleration = player.accelerationRate * player.direction;
+            } else {
+                acceleration = player.frictionRate * -1 * Math.sign(startVelocityX);
+                if (Math.abs(acceleration) > Math.abs(startVelocityX)){
+                    acceleration = - startVelocityX;
+                }
+            }
             const maxSpeed = player.maxSpeed;
 
-            const endPosition = startPosition;
-            player.setPosition(endPosition);
-            let endVelocity = startVelocity + acceleration;
+            let endPositionX = startPosition.x + startVelocityX * timing.step;
+            player.setPosition(endPositionX, startPosition.y);
+            let endVelocity = startVelocityX + acceleration;
             if (Math.abs(endVelocity) > maxSpeed){
                 endVelocity = maxSpeed * Math.sign(endVelocity);
             }
+            player.setVelocity(endVelocity);
         }
 
         advanceNpcs(timing){
@@ -72,14 +78,29 @@ const createEntityTracker = (function(global){
         checkNewSpawns(timing){
 
         }
+
+        getPositions(){
+            const positions = {
+                player: this._entities.player.getPosition(),
+                npcs: []
+            };
+
+            positions.player.state = "normal";
+
+            return positions;
+        }
     }
 
     class Entity {
         constructor(position, velocity){
-            this._position.x = position.x;
-            this._position.y = position.y;
-            this._velocity.x = velocity.x;
-            this._velocity.y = velocity.y;
+            this._position = {
+                x: position.x,
+                y: position.y
+            };
+            this._velocity = {
+                x: velocity.x,
+                y: velocity.y
+            };
         }
 
         getPosition(){
@@ -114,11 +135,13 @@ const createEntityTracker = (function(global){
             super(startPosition, {x: 0, y: 0});
 
             this.direction = 0;
-            this.maxSpeed = 10;
-            this.accelerationRate = 0.001;
+
+            this.maxSpeed = 0.4;
+            this.accelerationRate = 0.03;
+            this.frictionRate = 0.03;
         }
 
-        setDirection(){
+        setDirection(direction){
             if ([-1, 0, 1].includes(direction)){
                 this.direction = direction;
                 return direction;
