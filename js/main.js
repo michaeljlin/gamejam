@@ -19,6 +19,10 @@ var left2 = new Image();
 var right1 = new Image();
 var right2 = new Image();
 
+var explode1 = new Image();
+var explode2 = new Image();
+var explode3 = new Image();
+
 var obj_bomb = new Image();
 var obj_fish = new Image();
 var obj_mouse = new Image();
@@ -27,6 +31,9 @@ var obj_spider = new Image();
 var death = new Image();
 var deathState = false;
 var reachTop = false;
+
+var explodeState = false;
+var explodeFade = 1;
 
 var heartFull = new Image();
 var heartEmpty = new Image();
@@ -90,6 +97,10 @@ function initialize() {
     obj_mouse.src = './assets/images/obj-mouse.png';
     obj_spider.src = './assets/images/obj-spider.png';
 
+    explode1.src = './assets/images/ex1.png';
+    explode2.src = './assets/images/ex2.png';
+    explode3.src = './assets/images/ex3.png';
+
     heartFull.src = './assets/images/heartfull.png';
     heartEmpty.src = './assets/images/heartempty.png';
 
@@ -135,6 +146,11 @@ function handleDeath(){
     deathState = true;
 }
 
+function handleExplode(){
+    explodeFade = 1;
+    explodeState = true;
+}
+
 function game(gameObjects){
 
     // console.log('gameobj, ',gameObjects);
@@ -160,6 +176,22 @@ function game(gameObjects){
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
     animationCounter++;
+
+    if(explodeState){
+        ctx.save();
+
+        ctx.globalAlpha = explodeFade;
+        ctx.drawImage(explode3, 0,0, 871, 720, gameObjects.player.x+15, char.y, 130.65, 108); // 0.15 multiplier
+
+        ctx.restore();
+
+        explodeFade -=0.05;
+
+        if(explodeFade <= 0){
+            explodeState = false;
+            explodeFade = 1;
+        }
+    }
 
     if(!deathState){
         if(keys[37] === false && keys[39] === false){
