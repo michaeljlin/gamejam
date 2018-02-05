@@ -198,7 +198,7 @@ function game(gameObjects){
 
     ctx.fillStyle = 'black';
     ctx.font = '24px serif';
-    ctx.fillText('Score: ', 1100, 65);
+    ctx.fillText('Score: '+gameObjects.player.score, 1100, 65);
 
     // heartBar.map(function(heart, index){
     //     ctx.drawImage(heart, 0,0,240,180, 50+50*index, 50, 40, 30);
