@@ -31,23 +31,25 @@ const createEntityTracker = (function(global){
         }
 
         advanceTick(timing){
-            this.advancePlayer(timing);
-            if (this._entities.npcs.length > 0){
-                this.collectGarbage();
-                this.advanceNpcs(timing);
-                this.checkCollisions();
+            if (this._entities.player.getState() !== "dead"){
+                this.advancePlayer(timing);
+                if (this._entities.npcs.length > 0){
+                    this.collectGarbage();
+                    this.advanceNpcs(timing);
+                    this.checkCollisions();
+                }
+                this.checkNewSpawns(timing);
             }
-            this.checkNewSpawns(timing);
 
-            this._tickCallback(this.getPositions());
+            this._tickCallback(this.getState());
         }
 
         setPlayerDirection(direction){
             return this._entities.player.setDirection(direction);
         }
 
-        defineNpcType(name, size, spawnWeight = timestamp => 1){
-            this._npcTypes.set(name, {size, spawnWeight});
+        defineNpcType(name, size, harmful = false, spawnWeight = timestamp => 1){
+            this._npcTypes.set(name, {size, harmful, spawnWeight});
             return this;
         }
 
@@ -68,6 +70,12 @@ const createEntityTracker = (function(global){
 
             let endPositionX = startPosition.x + startVelocityX * timing.step;
             player.setPosition(endPositionX, startPosition.y);
+            if (player._position.left < 0){
+                player._position.left = 0;
+            }
+            if (player._position.right > this._worldSize.x){
+                player._position.right = this._worldSize.x;
+            }
             let endVelocity = startVelocityX + acceleration;
             if (Math.abs(endVelocity) > maxSpeed){
                 endVelocity = maxSpeed * Math.sign(endVelocity);
@@ -98,8 +106,19 @@ const createEntityTracker = (function(global){
                     && (player._position.top < npc._position.bottom);
                 if (horizontalOverlap && verticalOverlap){
                     npc.setState('eaten');
-                    player.setState('eating');
-                    console.log(`Collision with ${npc.getType()}!`);
+                    if (player.getState() !== 'harmed'){
+                        let newPlayerState = (this._npcTypes.get(npc.getType()).harmful)
+                            ? 'harmed'
+                            : 'eating';
+                        if (newPlayerState === 'harmed'){
+                            player.currentHealth--;
+                            if (player.currentHealth <= 0){
+                                newPlayerState = 'dead';
+                            }
+                        }
+                        player.setState(newPlayerState);
+                        console.log(`Collision with ${npc.getType()}! Current health: ${player.currentHealth} New player state: ${newPlayerState}`);
+                    }
                 }
             });
         }
@@ -159,13 +178,13 @@ const createEntityTracker = (function(global){
             const npc = new NonPlayerEntity(
                 type,
                 size,
-                {x: startX, y: 0},
+                {x: startX, y: -size.height},
                 {x: 0, y: 2}
             );
             this._entities.npcs.push(npc);
         }
 
-        getPositions(){
+        getState(){
             const positions = {
                 player: this._entities.player.getPosition(),
                 npcs: this._entities.npcs.map(npc => {
@@ -177,6 +196,7 @@ const createEntityTracker = (function(global){
             };
 
             positions.player.state = this._entities.player.getState();
+            positions.player.health = this._entities.player.getHealth();
 
             return positions;
         }
@@ -278,6 +298,16 @@ const createEntityTracker = (function(global){
             this.maxSpeed = 0.4;
             this.accelerationRate = 0.03;
             this.frictionRate = 0.03;
+
+            this.maxHealth = 9;
+            this.currentHealth = this.maxHealth;
+        }
+
+        getHealth(){
+            return {
+                current: this.currentHealth,
+                maximum: this.maxHealth
+            };
         }
 
         setDirection(direction){
