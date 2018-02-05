@@ -107,7 +107,8 @@ const createEntityTracker = (function(global){
         collectGarbage(){
             const npcs = this._entities.npcs;
             for (let i = npcs.length - 1; i >= 0; i--){
-                if (npcs[i].getState() === "offscreen"){
+                const state = npcs[i].getState();
+                if (["eaten", "offscreen"].includes(state)){
                     npcs.splice(i, 1);
                 }
             }
