@@ -157,6 +157,9 @@ function game(gameObjects){
     // ctx.drawImage(obj_fish, 0,0,672, 1326, 200, 0,  47.04, 92.82); //0.07 multiplier
     // ctx.drawImage(obj_bomb, 0,0, 816, 1758, 300,0 , 48.96, 105.48); //0.06 multiplier
 
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0,0, 50, 100);
+
     ctx.drawImage(playerImg, gameObjects.player.x, char.y, 155.55, 191.25);
 
     animationCounter++;
