@@ -47,11 +47,16 @@ var friction = 0.7;
 
 var animationCounter = 0;
 
+// ctx.drawImage(obj_spider, 0,0, 1056, 1788, 0,0, 52.8, 89.4); // 0.07 multiplier
+// ctx.drawImage(obj_mouse, 0, 0, 246, 468, 100, 0, 49.2, 93.6); // 0.2 multiplier
+// ctx.drawImage(obj_fish, 0,0,672, 1326, 200, 0,  47.04, 92.82); //0.07 multiplier
+// ctx.drawImage(obj_bomb, 0,0, 816, 1758, 300,0 , 48.96, 105.48); //0.06 multiplier
+
 const tracker = createEntityTracker({x: 1280, y: 720}, {width: 155.55, height: 191.25}, char, game);
-tracker.defineNpcType('rat', {width: 35, height: 100});
-tracker.defineNpcType('fish', {width: 35, height: 100});
-tracker.defineNpcType('bomb', {width: 35, height: 100});
-tracker.defineNpcType('spider', {width: 35, height: 100});
+tracker.defineNpcType('rat', {width: 47.04, height: 93.6});
+tracker.defineNpcType('fish', {width: 47.04, height: 92.82});
+tracker.defineNpcType('bomb', {width: 48.96, height: 105.48});
+tracker.defineNpcType('spider', {width: 52.8, height: 89.4});
 tracker.defineNpcType('wind-up fish', {width: 35, height: 100});
 gameLoop.addListener(tracker.advanceTick);
 
